@@ -7,6 +7,8 @@ from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 import csv
 from correctors import SpellingCorrector
+from sklearn.feature_extraction.text import CountVectorizer
+
 
 SPECIAL_CHARACTERS = [(u'Ä', 'Ae'), ('ä', 'ae'),
                       (u'Ö', 'Oe'), (u'ö', 'oe'),
@@ -17,7 +19,8 @@ SPECIAL_CHARACTERS = [(u'Ä', 'Ae'), ('ä', 'ae'),
 def extract_features(qfile='question_train.csv',
                      qcatfile='question_category_train.csv',
                      catfile='category.csv',
-                     spellcorrection=True,
+                     countwords=True,
+                     spellcorrection=False,
                      stemming=True,
                      subcats=True,
                      tokenization='word_tokenize',
