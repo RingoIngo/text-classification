@@ -3,6 +3,7 @@ from nltk.metrics import edit_distance
 
 
 class SpellingCorrector(object):
+    # TODO: maye convert the dic to lower case
     def __init__(self, dict_name='de_DE', max_dist=2):
         self.spell_dict = enchant.Dict(dict_name)
         self.max_dist = max_dist

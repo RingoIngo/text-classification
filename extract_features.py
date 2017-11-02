@@ -21,7 +21,8 @@ def extract_features(qfile='question_train.csv',
                      qcatfile='question_category_train.csv',
                      catfile='category.csv',
                      countwords=True,
-                     spellcorrection=True,
+                     metadata=True,
+                     spellcorrection=False,
                      stemming=True,
                      subcats=True,
                      tokenization='word_tokenize',
@@ -46,7 +47,11 @@ def extract_features(qfile='question_train.csv',
                                                 stemmer,
                                                 token_filter, tokenizer)
     count_vec = CountVectorizer(analyzer=clean_question)
-    pprint(count_vec.fit(questions).vocabulary_)
+    # pprint(count_vec.fit(questions).vocabulary_)
+    pprint(count_vec.fit_transform(questions).shape)
+    pprint(len(count_vec.vocabulary_))
+    print(categories)
+    print(qcats)
     return None
 
 
