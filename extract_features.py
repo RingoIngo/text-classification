@@ -8,6 +8,7 @@ from nltk.stem import SnowballStemmer
 import csv
 from correctors import SpellingCorrector
 from sklearn.feature_extraction.text import CountVectorizer
+from pprint import pprint
 
 
 SPECIAL_CHARACTERS = [(u'Ä', 'Ae'), ('ä', 'ae'),
@@ -20,14 +21,14 @@ def extract_features(qfile='question_train.csv',
                      qcatfile='question_category_train.csv',
                      catfile='category.csv',
                      countwords=True,
-                     spellcorrection=False,
+                     spellcorrection=True,
                      stemming=True,
                      subcats=True,
                      tokenization='word_tokenize',
                      outfile='features.npz'):
 
     categories, parentdic = _readcat(catfile, subcats)
-    questions = _readquestion(qfile, subcats, parentdic)
+    questions, qcats = _readquestion(qfile, subcats, parentdic)
 #    print(categories)
 #    print(parentdic)
 #    print(questions[0])
@@ -41,43 +42,34 @@ def extract_features(qfile='question_train.csv',
     # clean questions
     token_filter = _make_stopwords_and_punct_filter(
         set(stopwords.words('german')))
-    normQuestions = []
-    for i, (question, cat) in enumerate(questions):
-        clean_question = tokenize_and_clean(question,
-                                            spellcorrector, stemmer,
-                                            token_filter,
-                                            tokenizer)
-        # add tokens to dictionary set??
-        normQuestions.append((clean_question, cat))
-        if i < 100:
-            print(question)
-            print(clean_question)
-    # create dictionary from questions
-    # TODO
-
-    # extract features from cleaned questions
-    # TODO
+    clean_question = make_tokenizer_and_cleaner(spellcorrector,
+                                                stemmer,
+                                                token_filter, tokenizer)
+    count_vec = CountVectorizer(analyzer=clean_question)
+    pprint(count_vec.fit(questions).vocabulary_)
     return None
 
 
-def tokenize_and_clean(question, spellcorrector,
-                       stemmer, token_filter, tokenizer):
-    # TODO is language='german' a valid argument?
-    tokens = tokenizer.tokenize(question)
-    if spellcorrector is not None:
-        # spellcorrect only tokens that are not filtered
-        # since stopwords are in small case we filter .lower()
-        tokens = [spellcorrector.correct(w) for w in tokens if
+def make_tokenizer_and_cleaner(spellcorrector, stemmer, token_filter,
+                               tokenizer):
+    def tokenize_and_clean(question):
+        # TODO is language='german' a valid argument?
+        tokens = tokenizer.tokenize(question)
+        if spellcorrector is not None:
+            # spellcorrect only tokens that are not filtered
+            # since stopwords are in small case we filter .lower()
+            tokens = [spellcorrector.correct(w) for w in tokens if
+                      token_filter(w.lower())]
+        # normalize tokens
+        # tokens = [lambda w: _normalize(w, spellcorrected) for w in tokens if
+        #           token_filter(w.lower())]
+        tokens = [_normalize(w, spellcorrector is not None) for w in tokens if
                   token_filter(w.lower())]
-    # normalize tokens
-    # tokens = [lambda w: _normalize(w, spellcorrected) for w in tokens if
-    #           token_filter(w.lower())]
-    tokens = [_normalize(w, spellcorrector is not None) for w in tokens if
-              token_filter(w.lower())]
-    # stemm tokens
-    if stemmer is not None:
-        tokens = [stemmer.stem(w) for w in tokens]
-    return tokens
+        # stemm tokens
+        if stemmer is not None:
+            tokens = [stemmer.stem(w) for w in tokens]
+        return tokens
+    return tokenize_and_clean
 
 
 def _make_stopwords_and_punct_filter(stopWords):
@@ -129,20 +121,22 @@ def _readquestion(qfile, subcats, parentdic):
     with open(qfile, 'rU') as f:
         reader = csv.reader(f, quotechar='"', delimiter=',')
         questions = []
+        categories = []
         for rowno, row in enumerate(reader):
             # TODO: don't hardcode position
             # TODO: also correct in other in other functions
             try:
                 category_main_id = int(row[3])
                 question = row[4]
+                questions.append(question)
                 if subcats:
-                    questions.append((question, category_main_id))
+                    categories.append(category_main_id)
                 else:
-                    questions.append((question, parentdic[category_main_id]))
+                    categories.append(parentdic[category_main_id])
             except (ValueError, IndexError):
                 print("Line {} : Syntax error".format(rowno + 1))
                 continue
-    return questions
+    return questions, categories
 
 
 # run extract_features method if module is executed as a script
