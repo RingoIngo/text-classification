@@ -1,20 +1,8 @@
 # -*- coding: UTF-8 -*-
 # import numpy as np
-import string
-from nltk.tokenize import TreebankWordTokenizer
-from nltk.tokenize import WordPunctTokenizer
-from nltk.corpus import stopwords
-from nltk.stem import SnowballStemmer
 import csv
-from correctors import SpellingCorrector
-from sklearn.feature_extraction.text import CountVectorizer
 from pprint import pprint
-
-
-SPECIAL_CHARACTERS = [(u'Ä', 'Ae'), ('ä', 'ae'),
-                      (u'Ö', 'Oe'), (u'ö', 'oe'),
-                      (u'Ü', 'Ue'), (u'ü', 'ue'),
-                      (u'ß', 'ss')]
+import create_model
 
 
 def extract_features(qfile='question_train.csv',
@@ -24,74 +12,25 @@ def extract_features(qfile='question_train.csv',
                      metadata=True,
                      spellcorrection=False,
                      stemming=True,
-                     subcats=True,
+                     subcats=False,
                      tokenization='word_tokenize',
                      outfile='features.npz'):
 
     categories, parentdic = _readcat(catfile, subcats)
     questions, qcats = _readquestion(qfile, subcats, parentdic)
-#    print(categories)
-#    print(parentdic)
-#    print(questions[0])
-    if tokenization == 'word_punct_tokenize':
-        tokenizer = WordPunctTokenizer()
-    else:
-        # adviced tokenizer TODO: provide reference
-        tokenizer = TreebankWordTokenizer()
-    spellcorrector = SpellingCorrector() if spellcorrection else None
-    stemmer = SnowballStemmer('german') if stemming else None
-    # clean questions
-    token_filter = _make_stopwords_and_punct_filter(
-        set(stopwords.words('german')))
-    clean_question = make_tokenizer_and_cleaner(spellcorrector,
-                                                stemmer,
-                                                token_filter, tokenizer)
-    count_vec = CountVectorizer(analyzer=clean_question)
-    # pprint(count_vec.fit(questions).vocabulary_)
-    pprint(count_vec.fit_transform(questions).shape)
-    pprint(len(count_vec.vocabulary_))
+    model = create_model.create_pipeline()
+    model.set_params(reduction=None)
+    features = model.fit_transform(questions, qcats)
+    # featurenames = model.vocabulary_
+    featurenames = model.named_steps['vectorize'].get_feature_names()
+    categoryids = qcats
+    print("feature size{}".format(features.shape))
+    print("featurenames size {}".format(len(featurenames)))
+    print("categoryids size {}".format(len(categoryids)))
+    print("categories size: {}".format(len(categories)))
+    print("number of questions: {}".format(len(questions)))
     print(categories)
-    print(qcats)
     return None
-
-
-def make_tokenizer_and_cleaner(spellcorrector, stemmer, token_filter,
-                               tokenizer):
-    def tokenize_and_clean(question):
-        # TODO is language='german' a valid argument?
-        tokens = tokenizer.tokenize(question)
-        if spellcorrector is not None:
-            # spellcorrect only tokens that are not filtered
-            # since stopwords are in small case we filter .lower()
-            tokens = [spellcorrector.correct(w) for w in tokens if
-                      token_filter(w.lower())]
-        # normalize tokens
-        # tokens = [lambda w: _normalize(w, spellcorrected) for w in tokens if
-        #           token_filter(w.lower())]
-        tokens = [_normalize(w, spellcorrector is not None) for w in tokens if
-                  token_filter(w.lower())]
-        # stemm tokens
-        if stemmer is not None:
-            tokens = [stemmer.stem(w) for w in tokens]
-        return tokens
-    return tokenize_and_clean
-
-
-def _make_stopwords_and_punct_filter(stopWords):
-    def remove_stop_words_and_punctuation(word):
-        return ((word not in stopWords)
-                and not all(c in string.punctuation for c in word))
-    return remove_stop_words_and_punctuation
-
-
-def _normalize(word, spellcorrected):
-    word = word.lower()
-    # if tokens are not spellcorrected, unify special character
-    if not spellcorrected:
-        for (Umlaut, replacement) in SPECIAL_CHARACTERS:
-            word = word.replace(Umlaut, replacement)
-    # TODO: deal with numbers and dates
-    return word
 
 
 def _readcat(catfile, subcats):

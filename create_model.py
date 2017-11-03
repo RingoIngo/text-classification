@@ -16,14 +16,18 @@ def identity(words):
     return words
 
 
-class TextTokenizerAndClear(BaseEstimator, TransformerMixin):
+class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
 
     def __init__(self, mapnumerics=True, spellcorrect=False,
                  stem=True, tokenizer='word_tokenizer'):
+        self.special_characters_map = [(u'Ä', 'Ae'), ('ä', 'ae'),
+                                       (u'Ö', 'Oe'), (u'ö', 'oe'),
+                                       (u'Ü', 'Ue'), (u'ü', 'ue'),
+                                       (u'ß', 'ss')]
         self.stopwords = set(stopwords.words('german'))
         # add also 'Umlaut' variants of stopwords to stopwords
-        self.stopwords = self.stopwords.union([self.map_special_char(w)
-                                              for w in self.stopwords])
+        self.stopwords = self.stopwords.union(
+            [self.map_special_char(w) for w in self.stopwords])
         self.spellcorrector = SpellingCorrector() if spellcorrect else None
         self.stemmer = SnowballStemmer('german') if stem else None
         if tokenizer == 'word_punct_tokenize':
@@ -32,10 +36,6 @@ class TextTokenizerAndClear(BaseEstimator, TransformerMixin):
             # adviced tokenizer TODO: provide reference
             self.tokenizer = TreebankWordTokenizer()
 
-        self.special_characters_map = [(u'Ä', 'Ae'), ('ä', 'ae'),
-                                       (u'Ö', 'Oe'), (u'ö', 'oe'),
-                                       (u'Ü', 'Ue'), (u'ü', 'ue'),
-                                       (u'ß', 'ss')]
         self.mapnumerics = mapnumerics
 
     def is_punct(self, token):
@@ -51,7 +51,7 @@ class TextTokenizerAndClear(BaseEstimator, TransformerMixin):
         return False
 
     def map_special_char(self, token):
-        for (Umlaut, replacement) in self.special_characters:
+        for (Umlaut, replacement) in self.special_characters_map:
             token = token.replace(Umlaut, replacement)
         return token
 
@@ -96,11 +96,10 @@ class TextTokenizerAndClear(BaseEstimator, TransformerMixin):
 def create_pipeline(estimator=None):
 
     steps = [
-        ('tokens', TextTokenizerAndClear()),
-        ('vectorize', CountVectorizer()),
-        ('tfidf', TfidfTransformer(
-            tokenizer=identity, preprocessor=None, lowercase=False
-        )),
+        ('tokens', TextTokenizerAndCleaner()),
+        ('vectorize', CountVectorizer(tokenizer=identity, preprocessor=None,
+                                      lowercase=False)),
+        ('tfidf', TfidfTransformer(use_idf=False)),
         ('reduction', TruncatedSVD(n_components=10000))
     ]
 
