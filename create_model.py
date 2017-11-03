@@ -18,8 +18,8 @@ def identity(words):
 
 class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
 
-    def __init__(self, mapnumerics=True, spellcorrect=False,
-                 stem=True, tokenizer='word_tokenizer'):
+    def __init__(self, mapnumerics=True, spellcorrector=False,
+                 stemmer=True, tokenizer='word_tokenizer'):
         self.special_characters_map = [(u'Ä', 'Ae'), ('ä', 'ae'),
                                        (u'Ö', 'Oe'), (u'ö', 'oe'),
                                        (u'Ü', 'Ue'), (u'ü', 'ue'),
@@ -28,15 +28,41 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         # add also 'Umlaut' variants of stopwords to stopwords
         self.stopwords = self.stopwords.union(
             [self.map_special_char(w) for w in self.stopwords])
-        self.spellcorrector = SpellingCorrector() if spellcorrect else None
-        self.stemmer = SnowballStemmer('german') if stem else None
-        if tokenizer == 'word_punct_tokenize':
-            self.tokenizer = WordPunctTokenizer()
+        # note getter and setter methods
+        self.spellcorrector = spellcorrector
+        self.stemmer = stemmer
+        self.tokenizer = tokenizer
+        self.mapnumerics = mapnumerics
+
+    @property
+    def spellcorrector(self):
+        return self.__spellcorrector
+
+    @spellcorrector.setter
+    def spellcorrector(self, spellcorrector):
+        self.__spellcorrector = SpellingCorrector() if spellcorrector else None
+
+    @property
+    def stemmer(self):
+        return self.__stemmer
+
+    @stemmer.setter
+    def stemmer(self, stemmer):
+        print("stemmer in setter: {}".format(stemmer))
+        self.__stemmer = SnowballStemmer('german') if stemmer else None
+
+    @property
+    def tokenizer(self):
+        return self.__tokenizer
+
+    @tokenizer.setter
+    def tokenizer(self, tokenizer):
+        print("tokenizer in setter: {}".format(tokenizer))
+        if tokenizer == 'word_punct_tokenizer':
+            self.__tokenizer = WordPunctTokenizer()
         else:
             # adviced tokenizer TODO: provide reference
-            self.tokenizer = TreebankWordTokenizer()
-
-        self.mapnumerics = mapnumerics
+            self.__tokenizer = TreebankWordTokenizer()
 
     def is_punct(self, token):
         return all(c in string.punctuation for c in token)
@@ -80,6 +106,8 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         tokens = [self.normalize(token) for token in tokens if
                   self.filter_token(token)]
         # stemm tokens
+#         print(self.stemmer is not None)
+#         print(self.stemmer)
         if self.stemmer is not None:
             tokens = [self.stemmer.stem(token) for token in tokens]
 
