@@ -48,7 +48,6 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
 
     @stemmer.setter
     def stemmer(self, stemmer):
-        print("stemmer in setter: {}".format(stemmer))
         self.__stemmer = SnowballStemmer('german') if stemmer else None
 
     @property
@@ -57,7 +56,6 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
 
     @tokenizer.setter
     def tokenizer(self, tokenizer):
-        print("tokenizer in setter: {}".format(tokenizer))
         if tokenizer == 'word_punct_tokenizer':
             self.__tokenizer = WordPunctTokenizer()
         else:
@@ -106,8 +104,6 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         tokens = [self.normalize(token) for token in tokens if
                   self.filter_token(token)]
         # stemm tokens
-#         print(self.stemmer is not None)
-#         print(self.stemmer)
         if self.stemmer is not None:
             tokens = [self.stemmer.stem(token) for token in tokens]
 
