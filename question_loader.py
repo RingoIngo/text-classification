@@ -1,5 +1,5 @@
 """
-The :mod:`question_loade` module implements a class which handles the loading
+The :mod:`question_loader` module implements a class which handles the loading
 and the properties of the question files
 """
 # Author: Ingo Gühring
@@ -7,13 +7,11 @@ and the properties of the question files
 import csv
 import numpy as np
 
-from sklearn.cross_validation import KFold
-
 
 class QuestionLoader(object):
     """A loader and container for all properties of the data files.
 
-    Load all data files and store the data.
+    Loads all data files and stores the data.
     The data files must have a specific format.
 
     An example on how to use the class can be found
@@ -77,8 +75,8 @@ class QuestionLoader(object):
             category_id_idx = f_header.index("category_id")
             parent_id_idx = f_header.index("parent_id")
             category_name_idx = f_header.index("category_name")
-            nSyntaxErrors = 0
-            for rowno, row in enumerate(reader):
+            nsyntax_errors = 0
+            for row in reader:
                 # filter category "n" and junk
                 try:
                     category_id = int(row[category_id_idx])
@@ -97,15 +95,19 @@ class QuestionLoader(object):
                                   parent_id, category_name)
                         continue
                 except (ValueError, IndexError):
-                    nSyntaxErrors = nSyntaxErrors + 1
+                    nsyntax_errors = nsyntax_errors + 1
                     continue
         if verbose:
             print("{} lines in {} not read because of syntax errors".format(
-                nSyntaxErrors, self.catfile))
+                nsyntax_errors, self.catfile))
         return categories, parentdic
 
     def _read_question_file(self, verbose):
         """reads and stores the questions and corresponding categories.
+
+        If ``subcats`` attribute is false the categories read from
+        the file (which are subcategories) are translated to parent
+        categories. For this the ``parentdictionary`` attribute is used.
 
         Returns
         -------
@@ -123,8 +125,8 @@ class QuestionLoader(object):
             question_idx = f_header.index("question")
             questions = []
             categoryids = []
-            nSyntaxErrors = 0
-            for rowno, row in enumerate(reader):
+            nsyntax_errors = 0
+            for row in reader:
                 try:
                     category_main_id = int(row[category_main_id_idx])
                     question = row[question_idx]
@@ -135,9 +137,9 @@ class QuestionLoader(object):
                         categoryids.append(
                             self.parentdictionary[category_main_id])
                 except (ValueError, IndexError):
-                    nSyntaxErrors = nSyntaxErrors + 1
+                    nsyntax_errors = nsyntax_errors + 1
                     continue
         if verbose:
             print("{} not in {} read because of syntax errors".format(
-                nSyntaxErrors, self.qfile))
+                nsyntax_errors, self.qfile))
         return questions, np.array(categoryids)

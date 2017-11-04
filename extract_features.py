@@ -5,7 +5,7 @@ The :mod:`extract_features` module implements the function
 # Author: Ingo Gühring
 import numpy as np
 
-import create_model
+import smsguru_model
 import question_loader as ql
 
 
@@ -29,7 +29,7 @@ def extract_features(qfile='question_train.csv',
     """
     loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
                                subcats=subcats, verbose=verbose)
-    model = create_model.create_pipeline()
+    model = smsguru_model.create_pipeline()
     # tokens is the name of the first transformation in the pipeline
     model.set_params(tokens__mapdates=mapdates,
                      tokens__mapnumbers=mapnumbers,
@@ -54,7 +54,6 @@ def extract_features(qfile='question_train.csv',
              featurenames=featurenames,
              categoryids=loader.categoryids,
              categories=loader.categories)
-    print(features > 1)
 
 
 # run extract_features method if module is executed as a script

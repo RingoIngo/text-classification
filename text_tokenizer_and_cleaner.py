@@ -1,7 +1,6 @@
 """
-The :mod: `create_model` contains the `TextTokenizerAndCleaner` class,
-which handles the preprocessing of the text, and a method to create a
-pipeline of transformers - the model.
+The :mod: `text_tokenizer_and_cleaner` contains the `TextTokenizerAndCleaner`
+class, which handles the preprocessing of the text
 """
 # Author: Ingo Gühring
 # This module is inspired by the book
@@ -17,9 +16,6 @@ from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.decomposition import TruncatedSVD
-from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
-from sklearn.pipeline import Pipeline
 
 from correctors import SpellingCorrector
 
@@ -203,37 +199,3 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         """Process each question in the list questions"""
         for question in questions:
             yield self.tokenize_and_clean(question)
-
-
-def _identity(words):
-    return words
-
-
-def create_pipeline(estimator=None):
-    """Chain processing steps
-
-    Build a `Pipeline` in which all processing steps are chained.
-    1. tokenize and clean text
-    2. vectorize tokens
-    3. tfidf weighting
-    4. TruncatedSVD reduction
-    5. estimator (optinal)
-
-    Parameters
-    ----------
-    estimator : an estimator, optinal, which is applied as last step
-        in the chain. Default is None.
-    """
-
-    steps = [
-        ('tokens', TextTokenizerAndCleaner()),
-        ('vectorize', CountVectorizer(tokenizer=_identity, preprocessor=None,
-                                      lowercase=False)),
-        ('tfidf', TfidfTransformer()),
-        ('reduction', TruncatedSVD(n_components=10000))
-    ]
-
-    if estimator is not None:
-        # Add the estimator
-        steps.append(('classifier', estimator))
-    return Pipeline(steps)
