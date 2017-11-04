@@ -9,6 +9,7 @@ pipeline of transformers - the model.
 #    Bengfort, Ojeda and Bilbro
 
 import string
+from datetime import datetime
 
 from nltk.tokenize import TreebankWordTokenizer
 from nltk.tokenize import WordPunctTokenizer
@@ -36,11 +37,14 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
-    mapnumerics : boolean, if True a mapping is applied
-        to all tokens containing numerics. By default the
-        mapping is applied. All dates will be mapped to a
-        dummy date, all times to a dummy time
-        and the rest to a dummy number.
+    mapdates : boolean, if True all dates are mapped to a dummy date
+        Default is True.
+
+    mapnumbers : boolean, if True and `mapdates` also True,
+        then all tokens which are not a date and contain a
+        number are mapped to a dummy number. If True and
+        `mapdates` is False, then all tokens containing a
+        number are mapped to a dummy number. Default is False.
 
     spellcorrector : boolean, if True tokens will be spell
         corrected. Since this is very time consuming default
@@ -64,8 +68,11 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
                               (u'Ö', 'Oe'), (u'ö', 'oe'),
                               (u'Ü', 'Ue'), (u'ü', 'ue'),
                               (u'ß', 'ss')]
+    date_patterns = ["%d-%m-%Y", "%d-%m-%y", "%Y-%m-%d", "%y-%m-%d",
+                     "%d/%m/%Y", "%d/%m/%y", "%Y/%m/%d", "%y/%m/%d",
+                     "%d.%m.%Y", "%d.%m.%y", "%Y.%m.%d", "%y.%m.%d"]
 
-    def __init__(self, mapnumerics=True, spellcorrector=False,
+    def __init__(self, mapdates=True, mapnumbers=False, spellcorrector=False,
                  stemmer=True, tokenizer='word_tokenizer'):
         self.stopwords = set(stopwords.words('german'))
         # add also 'Umlaut' variants of stopwords to stopwords
@@ -75,7 +82,8 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         self.spellcorrector = spellcorrector
         self.stemmer = stemmer
         self.tokenizer = tokenizer
-        self.mapnumerics = mapnumerics
+        self.mapdates = mapdates
+        self.mapnumbers = mapnumbers
 
     @property
     def spellcorrector(self):
@@ -111,7 +119,6 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         if tokenizer == 'word_punct_tokenizer':
             self.__tokenizer = WordPunctTokenizer()
         else:
-            # adviced tokenizer TODO: provide reference
             self.__tokenizer = TreebankWordTokenizer()
 
     def is_punct(self, token):
@@ -122,9 +129,19 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         """Return if token is stopword"""
         return token.lower() in self.stopwords
 
-    def is_date(self, token):
-        """Return if token is date"""
+    def is_pattern(self, token, patterns):
+        """Return if token corresponds to a pattern in patterns"""
+        for pattern in patterns:
+            try:
+                # print(datetime.strptime(token, pattern))
+                datetime.strptime(token, pattern)
+                return True
+            except ValueError:
+                pass
         return False
+
+    def has_number(self, token):
+        return any(char.isdigit() for char in token)
 
     def is_time(self, token):
         """"Return if token is time"""
@@ -152,9 +169,10 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         # if tokens are not spellcorrected, unify special character
         if self.spellcorrector is None:
             token = self.map_special_char(token)
-        # TODO: deal with numbers and dates
-        if self.mapnumerics:
-            token = token
+        if self.mapdates and self.is_pattern(token, self.date_patterns):
+            token = "00.00.00"
+        elif self.mapnumbers and self.has_number(token):
+            token = "0"
         return token
 
     def tokenize_and_clean(self, question):

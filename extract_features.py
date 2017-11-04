@@ -1,17 +1,20 @@
-# -*- coding: UTF-8 -*-
-# import numpy as np
+"""
+The :mod:`extract_features` module implements the function
+`extract_features`
+"""
+# Author: Ingo Gühring
+import numpy as np
+
 import create_model
 import question_loader as ql
-import numpy as np
-import pprint
 
 
 def extract_features(qfile='question_train.csv',
                      qcatfile='question_category_train.csv',
                      catfile='category.csv',
                      binary=False,
-                     countwords=True,
-                     mapnumerics=True,
+                     mapdates=True,
+                     mapnumbers=False,
                      metadata=True,
                      spellcorrector=False,
                      stemmer=True,
@@ -21,17 +24,19 @@ def extract_features(qfile='question_train.csv',
                      tokenizer='word_tokenizer',
                      outfile='features.npz',
                      verbose=True):
-
+    """Extract features from files with questions and categories
+    TODO: add doc when function finished
+    """
     loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
                                subcats=subcats, verbose=verbose)
     model = create_model.create_pipeline()
     # tokens is the name of the first transformation in the pipeline
-    model.set_params(tokens__mapnumerics=mapnumerics,
+    model.set_params(tokens__mapdates=mapdates,
+                     tokens__mapnumbers=mapnumbers,
                      tokens__spellcorrector=spellcorrector,
                      tokens__stemmer=stemmer,
                      tokens__tokenizer=tokenizer,
-                     vectorize__binary=binary,
-                     )
+                     vectorize__binary=binary)
     if not tfidf:
         model.set_params(tfidf=None)
     if not reduction:
@@ -55,4 +60,4 @@ def extract_features(qfile='question_train.csv',
 # run extract_features method if module is executed as a script
 # put non-default input here in function
 if __name__ == "__main__":
-    extract_features(tfidf=False)
+    extract_features(tfidf=False, mapnumbers=True)
