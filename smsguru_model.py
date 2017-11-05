@@ -8,9 +8,11 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
+from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.neighbors import KNeighborsClassifier
 
 import text_tokenizer_and_cleaner as ttc
-
+import question_loader as ql
 
 def _identity(words):
     return words
@@ -37,7 +39,7 @@ def create_pipeline(estimator=None):
         ('vectorize', CountVectorizer(tokenizer=_identity, preprocessor=None,
                                       lowercase=False)),
         ('tfidf', TfidfTransformer()),
-        ('reduction', TruncatedSVD(n_components=10000))
+        ('reduce_dim', SelectKBest(chi2, k=500))
     ]
 
     if estimator is not None:
@@ -46,19 +48,47 @@ def create_pipeline(estimator=None):
     return Pipeline(steps)
 
 
-def evaluate_model(estimator):
-    model = create_pipeline()
+def evaluate_model(qfile, catfile, verbose, subcats):
+    CV = 5
+    N_DIM_OPTIONS = [500]
+
+    model = create_pipeline(KNeighborsClassifier())
     # TODO:on cluster allow also reduction and spell
-    param_grid = dict(tokens__mapdates=[True, False],
-                      tokens__mapnumbers=[True, False],
-                      tokens__spellcorrector=[False],
-                      tokens__stemmer=[True, False],
-                      tokens__tokenizer=['word_tokenizer',
-                                         'word_punct_tokenizer'],
-                      vectorize__binary=[True, False],
-                      tfidf=[None, TfidfTransformer()],
-                      reduction=[None])
-    grid_search = GridSearchCV(model, param_grid=param_grid)
+    param_grid = [
+        # multivariate feature selection
+        dict(tokens__mapdates=[True, False],
+             tokens__mapnumbers=[True, False],
+             tokens__spellcorrector=[False],
+             tokens__stemmer=[True, False],
+             tokens__tokenizer=['word_tokenizer',
+                                'word_punct_tokenizer'],
+             vectorize__binary=[True, False],
+             vectorize__min_df=[1, 2],
+             tfidf=[None, TfidfTransformer()],
+             reduce_dim=[TruncatedSVD()],
+             reduce_dim__n_components=N_DIM_OPTIONS
+             ),
+        # univariate feature selection
+        dict(tokens__mapdates=[True, False],
+             tokens__mapnumbers=[True, False],
+             tokens__spellcorrector=[False],
+             tokens__stemmer=[True, False],
+             tokens__tokenizer=['word_tokenizer',
+                                'word_punct_tokenizer'],
+             vectorize__binary=[True, False],
+             vectorize__min_df=[1, 2],
+             tfidf=[None, TfidfTransformer()],
+             reduce_dim=[SelectKBest(chi2)],
+             reduce_dim__k=N_DIM_OPTIONS,
+             ),
+    ]
+    grid_search = GridSearchCV(model, cv=CV,
+                               param_grid=param_grid,
+                               return_train_score=True)
+    loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
+                               subcats=subcats, verbose=verbose)
+    grid_search.fit(loader.questions, loader.categoryids)
+    # TODO: save results
     return None
 
 

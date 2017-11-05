@@ -19,9 +19,10 @@ def extract_features(qfile='question_train.csv',
                      spellcorrector=False,
                      stemmer=True,
                      subcats=True,
-                     reduction=False,
+                     svd=False,
                      tfidf=False,
-                     tokenizer='word_tokenizer',
+                     min_df=1,
+                     tokenizer='word_punct_tokenizer',
                      outfile='features.npz',
                      verbose=True):
     """Extract features from files with questions and categories
@@ -36,19 +37,27 @@ def extract_features(qfile='question_train.csv',
                      tokens__spellcorrector=spellcorrector,
                      tokens__stemmer=stemmer,
                      tokens__tokenizer=tokenizer,
-                     vectorize__binary=binary)
+                     vectorize__binary=binary,
+                     vectorize__min_df=min_df)
     if not tfidf:
         model.set_params(tfidf=None)
-    if not reduction:
-        model.set_params(reduction=None)
+    if not svd:
+        model.set_params(svd=None)
+    # get features
     features = model.fit_transform(loader.questions, loader.categoryids)
-    featurenames = model.named_steps['vectorize'].get_feature_names()
+    # get feature names
+    if svd:
+        featurenames = None
+    else:
+        featurenames = model.named_steps['vectorize'].get_feature_names()
     if verbose:
         print("feature matrix size {}".format(features.T.shape))
         print("featurenames size {}".format(len(featurenames)))
         print("categoryids size {}".format(len(loader.categoryids)))
         print("categories size: {}".format(len(loader.categories)))
         print("number of questions: {}".format(len(loader.questions)))
+        print("filtered because of min_df = {}:".format(min_df))
+        print(model.named_steps['vectorize'].stop_words_)
     # save extracted features
     np.savez(outfile, features=features.T,
              featurenames=featurenames,
@@ -59,4 +68,4 @@ def extract_features(qfile='question_train.csv',
 # run extract_features method if module is executed as a script
 # put non-default input here in function
 if __name__ == "__main__":
-    extract_features(tfidf=False, mapnumbers=True)
+    extract_features(tokenizer='word_tokenizer', tfidf=True, mapnumbers=True, min_df=2)

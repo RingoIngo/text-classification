@@ -175,7 +175,7 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         """Apply specified text preprocessing methods on question
         and return list of cleaned tokens
         """
-        tokens = self.tokenizer.tokenize(question)
+        tokens = self.tokenizer.tokenize(question, escape_forward_slash_asterisk=False)
         if self.spellcorrector is not None:
             # spellcorrect only tokens that are not filtered
             tokens = [self.spellcorrector.correct(token) for token in tokens if
