@@ -41,8 +41,8 @@ def extract_features(qfile='question_train.csv',
                      vectorize__min_df=min_df)
     if not tfidf:
         model.set_params(tfidf=None)
-    if not svd:
-        model.set_params(svd=None)
+    # TODO: integrade reduce_dim
+    model.set_params(reduce_dim=None)
     # get features
     features = model.fit_transform(loader.questions, loader.categoryids)
     # get feature names
@@ -57,11 +57,11 @@ def extract_features(qfile='question_train.csv',
         print("categories size: {}".format(len(loader.categories)))
         print("number of questions: {}".format(len(loader.questions)))
         print("filtered because of min_df = {}:".format(min_df))
-        print(model.named_steps['vectorize'].stop_words_)
+        # print(model.named_steps['vectorize'].stop_words_)
     # save extracted features
-    np.savez(outfile, features=features.T,
+    np.savez(outfile, features=features.T.toarray(),
              featurenames=featurenames,
-             categoryids=loader.categoryids,
+             categoryids=loader.categoryids[None, :],
              categories=loader.categories)
 
 

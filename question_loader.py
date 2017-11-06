@@ -28,10 +28,6 @@ class QuestionLoader(object):
         and a parent_id (int). If the parent_id eqauals zero the
         category has no parent.
 
-    folds : TODO
-
-    shuffle : TODO
-
     subcats : boolean which determines if the in qfile specified
         subcategory or its parent category is assigned to a question.
 
@@ -41,14 +37,11 @@ class QuestionLoader(object):
 
     def __init__(self, qfile='question_train.csv',
                  catfile='category.csv',
-                 folds=None,
-                 shuffle=True,
                  subcats=True,
                  verbose=False):
         self.qfile = qfile
         self.catfile = catfile
         self.subcats = subcats
-        self.folds = folds
         self.categories, self.parentdictionary = self._read_category_file(
             verbose)
         self.questions, self.categoryids = self._read_question_file(verbose)
@@ -142,4 +135,4 @@ class QuestionLoader(object):
         if verbose:
             print("{} not in {} read because of syntax errors".format(
                 nsyntax_errors, self.qfile))
-        return questions, np.array(categoryids)
+        return questions, np.asarray(categoryids)

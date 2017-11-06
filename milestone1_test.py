@@ -11,12 +11,14 @@ import numpy
 from extract_features import extract_features
 
 # call extract_features()
-sys.stdout.write('Calling function extract_features() with default parameters... ')
+sys.stdout.write(
+    'Calling function extract_features() with default parameters... ')
 extract_features()
 sys.stdout.write('done.\n')
 
 # check whether file 'features.npz' exists
-sys.stdout.write('Checking whether file \'features.npz\' has been generated... ')
+sys.stdout.write(
+    'Checking whether file \'features.npz\' has been generated... ')
 if os.path.exists('features.npz'):
     sys.stdout.write('OK.\n')
 else:
@@ -38,7 +40,8 @@ if 'features' in data.files:
         (d, n) = data['features'].shape
         sys.stdout.write('d = ' + str(d) + ', n = ' + str(n) + '\n')
     else:
-        sys.stdout.write('ERROR: \'features\' is not a numpy array! Found type: ' + type(data['features']).__name__ + ', expected type: ndarray\n')
+        sys.stdout.write('ERROR: \'features\' is not a numpy array! Found type: '
+                         + type(data['features']).__name__ + ', expected type: ndarray\n')
         sys.exit()
 else:
     sys.stdout.write('ERROR: variable \'features\' not found.\n')
@@ -50,10 +53,10 @@ if 'featurenames' in data.files:
     if type(data['featurenames']).__name__ == 'ndarray':
         l = len(data['featurenames'])
         if l == d:
-	    sys.stdout.write('Length of \'featurenames\' equals d: OK.\n')
-	else:
-	    sys.stdout.write('ERROR: List \'featurenames\' has wrong length! Found: ' + str(l) + ', expected: ' + str(d) + '\n')
-	    sys.exit()
+            sys.stdout.write('Length of \'featurenames\' equals d: OK.\n')
+        else:
+            sys.stdout.write('ERROR: List \'featurenames\' has wrong length! Found: ' + str(l) + ', expected: ' + str(d) + '\n')
+            sys.exit()
     else:
         sys.stdout.write('ERROR: \'featurenames\' is not a numpy array! Found type: ' + type(data['featurenames']).__name__ + ', expected type: ndarray\n')
         sys.exit()
@@ -67,10 +70,10 @@ if 'categoryids' in data.files:
     if type(data['categoryids']).__name__ == 'ndarray':
         cidsformat = data['categoryids'].shape
         if cidsformat == (1, n):
-	    sys.stdout.write('Format is 1 x n: OK.\n')
-	else:
-	    sys.stdout.write('ERROR: \'categoryids\' has not the correct format! Found: ' + str(cidsformat[0]) + ' x ' + str(cidsformat[1]) + ', expected: 1 x n\n')
-	    sys.exit()
+            sys.stdout.write('Format is 1 x n: OK.\n')
+        else:
+            sys.stdout.write('ERROR: \'categoryids\' has not the correct format! Found: ' + str(cidsformat[0]) + ' x ' + str(cidsformat[1]) + ', expected: 1 x n\n')
+            sys.exit()
     else:
         sys.stdout.write('ERROR: \'categoryids\' is not a numpy array! Found type: ' + type(data['categoryids']).__name__ + ', expected type: ndarray\n')
         sys.exit()

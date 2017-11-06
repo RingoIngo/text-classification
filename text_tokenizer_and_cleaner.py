@@ -115,6 +115,9 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         if tokenizer == 'word_punct_tokenizer':
             self.__tokenizer = WordPunctTokenizer()
         else:
+            # TODO: there sould be an option to turn off
+            # escapeForwardSlashAsterisk, which produces
+            # weird behaviour
             self.__tokenizer = TreebankWordTokenizer()
 
     def is_punct(self, token):
@@ -175,7 +178,7 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         """Apply specified text preprocessing methods on question
         and return list of cleaned tokens
         """
-        tokens = self.tokenizer.tokenize(question, escape_forward_slash_asterisk=False)
+        tokens = self.tokenizer.tokenize(question)
         if self.spellcorrector is not None:
             # spellcorrect only tokens that are not filtered
             tokens = [self.spellcorrector.correct(token) for token in tokens if
