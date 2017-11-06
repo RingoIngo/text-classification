@@ -3,8 +3,11 @@ The :mod:`extract_features` module implements the function
 `extract_features`
 """
 # Author: Ingo Gühring
+from sklearn.decomposition import TruncatedSVD
+from sklearn.feature_selection import SelectKBest, chi2
 import numpy as np
 import plac
+import pprint
 
 import smsguru_model
 import question_loader as ql
@@ -12,8 +15,10 @@ import question_loader as ql
 
 @plac.annotations(
     binary=(None, 'flag', 'bi'),
+    dim=(None, 'option', None, int),
     mapdates=(None, 'option', 'md'),
     mapnumbers=(None, 'option', 'mn'),
+    reduce_dim=(None, 'option', 're_d', str, ['chi2', 'trunSVD', 'None']),
     spellcorrector=(None, 'flag', 'sp'),
     stemmer=(None, 'option', None, bool),
     subcats=(None, 'option', None, bool),
@@ -26,13 +31,14 @@ def extract_features(qfile='question_train.csv',
                      qcatfile='question_category_train.csv',
                      catfile='category.csv',
                      binary=False,
+                     dim=500,
                      mapdates=True,
                      mapnumbers=False,
                      metadata=True,
+                     reduce_dim='chi2',
                      spellcorrector=False,
                      stemmer=True,
                      subcats=True,
-                     svd=False,
                      tfidf=False,
                      min_df=1,
                      tokenizer='word_punct_tokenizer',
@@ -52,17 +58,32 @@ def extract_features(qfile='question_train.csv',
                      tokens__tokenizer=tokenizer,
                      vectorize__binary=binary,
                      vectorize__min_df=min_df)
+    # term frequency weighting
     if not tfidf:
         model.set_params(tfidf=None)
-    # TODO: integrade reduce_dim
-    model.set_params(reduce_dim=None)
+
+    # dimension reduction
+    if reduce_dim == 'None':
+        model.set_params(reduce_dim=None)
+    elif reduce_dim == 'trunSVD':
+        model.set_params(reduce_dim=TruncatedSVD(n_components=dim))
+    elif reduce_dim == 'chi2':
+        model.set_params(reduce_dim=SelectKBest(chi2, k=dim))
+
     # get features
     features = model.fit_transform(loader.questions, loader.categoryids)
     # get feature names
-    if svd:
-        featurenames = None
-    else:
+    if reduce_dim == 'None':
         featurenames = model.named_steps['vectorize'].get_feature_names()
+    elif reduce_dim == 'trunSVD':
+        # no interpretable feature names
+        featurenames = None
+    elif reduce_dim == 'chi2':
+        featurenames = np.asarray(
+            model.named_steps['vectorize'].get_feature_names())
+        featurenames = featurenames[
+            model.named_steps['reduce_dim'].get_support()]
+
     if verbose:
         print("feature matrix size {}".format(features.T.shape))
         print("featurenames size {}".format(len(featurenames)))
@@ -71,6 +92,8 @@ def extract_features(qfile='question_train.csv',
         print("number of questions: {}".format(len(loader.questions)))
         print("filtered because of min_df = {}:".format(min_df))
         print(model.named_steps['vectorize'].stop_words_)
+        print("feature names: {}".format(featurenames))
+        pprint.pprint(featurenames)
     # save extracted features
     np.savez(outfile, features=features.T.toarray(),
              featurenames=featurenames,
