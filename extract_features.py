@@ -4,11 +4,24 @@ The :mod:`extract_features` module implements the function
 """
 # Author: Ingo Gühring
 import numpy as np
+import plac
 
 import smsguru_model
 import question_loader as ql
 
 
+@plac.annotations(
+    binary=(None, 'flag', 'bi'),
+    mapdates=(None, 'option', 'md'),
+    mapnumbers=(None, 'option', 'mn'),
+    spellcorrector=(None, 'flag', 'sp'),
+    stemmer=(None, 'option', None, bool),
+    subcats=(None, 'option', None, bool),
+    tfidf=(None, 'flag'),
+    min_df=(None, 'option', 'min_df', int),
+    tokenizer=(None, 'option', 'tok', str, ['word_punct_tokenizer',
+                                            'word_tokenizer']),
+    verbose=('', 'flag', 'v'))
 def extract_features(qfile='question_train.csv',
                      qcatfile='question_category_train.csv',
                      catfile='category.csv',
@@ -24,7 +37,7 @@ def extract_features(qfile='question_train.csv',
                      min_df=1,
                      tokenizer='word_punct_tokenizer',
                      outfile='features.npz',
-                     verbose=True):
+                     verbose=False):
     """Extract features from files with questions and categories
     TODO: add doc when function finished
     """
@@ -57,7 +70,7 @@ def extract_features(qfile='question_train.csv',
         print("categories size: {}".format(len(loader.categories)))
         print("number of questions: {}".format(len(loader.questions)))
         print("filtered because of min_df = {}:".format(min_df))
-        # print(model.named_steps['vectorize'].stop_words_)
+        print(model.named_steps['vectorize'].stop_words_)
     # save extracted features
     np.savez(outfile, features=features.T.toarray(),
              featurenames=featurenames,
@@ -68,4 +81,6 @@ def extract_features(qfile='question_train.csv',
 # run extract_features method if module is executed as a script
 # put non-default input here in function
 if __name__ == "__main__":
-    extract_features(tokenizer='word_tokenizer', tfidf=True, mapnumbers=True, min_df=2)
+    # extract_features(tokenizer='word_tokenizer',
+    #                  tfidf=True, mapnumbers=True, min_df=2)
+    plac.call(extract_features)
