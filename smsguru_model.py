@@ -53,7 +53,10 @@ def create_pipeline(estimator=None):
     return Pipeline(steps)
 
 
-def evaluate_model(qfile, catfile, verbose, subcats):
+def evaluate_model(qfile='question_train.csv',
+                   qcatfile='question_category_train.csv',
+                   subcats=True,
+                   verbose=10):
     CV = 5
     # the dimensions used in the dim reduction step
     N_DIM_OPTIONS = [500]
@@ -113,8 +116,8 @@ def evaluate_model(qfile, catfile, verbose, subcats):
                                param_grid=param_grid,
                                return_train_score=True,
                                scoring=SCORES,
-                               verbose=10)
-    loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
+                               verbose=verbose)
+    loader = ql.QuestionLoader(qfile=qfile, qcatfile=qcatfile,
                                subcats=subcats, verbose=verbose)
     grid_search.fit(loader.questions, loader.categoryids)
     return grid_search
