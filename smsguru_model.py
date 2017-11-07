@@ -54,7 +54,7 @@ def create_pipeline(estimator=None):
 
 
 def evaluate_model(qfile='question_train.csv',
-                   qcatfile='question_category_train.csv',
+                   catfile='category.csv',
                    subcats=True,
                    verbose=10):
     CV = 5
@@ -117,7 +117,7 @@ def evaluate_model(qfile='question_train.csv',
                                return_train_score=True,
                                scoring=SCORES,
                                verbose=verbose)
-    loader = ql.QuestionLoader(qfile=qfile, qcatfile=qcatfile,
+    loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
                                subcats=subcats, verbose=verbose)
     grid_search.fit(loader.questions, loader.categoryids)
     return grid_search
