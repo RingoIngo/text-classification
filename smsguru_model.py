@@ -116,6 +116,7 @@ def evaluate_model(qfile='question_train.csv',
                                param_grid=param_grid,
                                return_train_score=True,
                                scoring=SCORES,
+                               refit=False,
                                verbose=verbose)
     loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
                                subcats=subcats, verbose=verbose)
