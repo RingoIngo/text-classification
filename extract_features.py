@@ -7,7 +7,6 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectKBest, chi2
 import numpy as np
 import plac
-import pprint
 
 import smsguru_model
 import question_loader as ql
@@ -20,8 +19,8 @@ import question_loader as ql
     mapnumbers=(None, 'option', 'mn'),
     reduce_dim=(None, 'option', 're_d', str, ['chi2', 'trunSVD', 'None']),
     spellcorrector=(None, 'flag', 'sp'),
-    stemmer=(None, 'option', None, bool),
-    subcats=(None, 'option', None, bool),
+    stemmer=plac.Annotation(None, 'option', None, str, ['True', 'False']),
+    subcats=plac.Annotation(None, 'option', None, str, ['True', 'False']),
     tfidf=(None, 'flag'),
     min_df=(None, 'option', 'min_df', int),
     tokenizer=(None, 'option', 'tok', str, ['word_punct_tokenizer',
@@ -37,16 +36,19 @@ def extract_features(qfile='question_train.csv',
                      metadata=True,
                      reduce_dim='chi2',
                      spellcorrector=False,
-                     stemmer=True,
-                     subcats=True,
+                     stemmer='True',
+                     subcats='True',
                      tfidf=False,
                      min_df=1,
                      tokenizer='word_punct_tokenizer',
                      outfile='features.npz',
                      verbose=False):
     """Extract features from files with questions and categories
-    TODO: add doc when function finished
     """
+    # TODO: add doc when function finished
+    # this cumbersome construction is due to plac annotations
+    stemmer = True if stemmer == 'True' else False
+    subcats = True if subcats == 'True' else False
     loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
                                subcats=subcats, verbose=verbose)
     model = smsguru_model.create_pipeline()
@@ -93,7 +95,6 @@ def extract_features(qfile='question_train.csv',
         print("filtered because of min_df = {}:".format(min_df))
         print(model.named_steps['vectorize'].stop_words_)
         print("feature names: {}".format(featurenames))
-        pprint.pprint(featurenames)
     # save extracted features
     np.savez(outfile, features=features.T.toarray(),
              featurenames=featurenames,

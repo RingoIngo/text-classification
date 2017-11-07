@@ -5,6 +5,8 @@ and the properties of the question files
 # Author: Ingo Gühring
 
 import csv
+import pprint
+import operator
 import numpy as np
 
 
@@ -45,6 +47,7 @@ class QuestionLoader(object):
         self.categories, self.parentdictionary = self._read_category_file(
             verbose)
         self.questions, self.categoryids = self._read_question_file(verbose)
+        self.category_counts = self._get_category_counts(verbose)
 
     def _read_category_file(self, verbose):
         """read categoriy_id, parent_id and category_name from file
@@ -136,3 +139,13 @@ class QuestionLoader(object):
             print("{} not in {} read because of syntax errors".format(
                 nsyntax_errors, self.qfile))
         return questions, np.asarray(categoryids)
+
+    def _get_category_counts(self, verbose):
+        unique, counts = np.unique(self.categoryids, return_counts=True)
+        unique = [(cat_id, self.categories[cat_id]) for cat_id in unique]
+        category_counts = dict(zip(unique, counts))
+        if verbose:
+            print("category counts:")
+            pprint.pprint(sorted(category_counts.items(),
+                                 key=operator.itemgetter(1), reverse=True))
+        return category_counts
