@@ -19,8 +19,8 @@ import question_loader as ql
     mapdates=(None, 'option', 'md'),
     mapnumbers=(None, 'option', 'mn'),
     reduce_dim=(None, 'option', 're_d', str, ['chi2', 'trunSVD', 'None']),
-    spellcorrector=(None, 'flag', 'sp'),
-    stemmer=plac.Annotation(None, 'option', None, str, ['True', 'False']),
+    spellcorrect=(None, 'flag', 'sp'),
+    stem=plac.Annotation(None, 'option', None, str, ['True', 'False']),
     subcats=plac.Annotation(None, 'option', None, str, ['True', 'False']),
     tfidf=(None, 'flag'),
     min_df=(None, 'option', 'min_df', int),
@@ -36,8 +36,8 @@ def extract_features(qfile='question_train.csv',
                      mapnumbers=False,
                      metadata=True,
                      reduce_dim='chi2',
-                     spellcorrector=False,
-                     stemmer='True',
+                     spellcorrect=False,
+                     stem='True',
                      subcats='True',
                      tfidf=False,
                      min_df=1,
@@ -48,7 +48,7 @@ def extract_features(qfile='question_train.csv',
     """
     # TODO: add doc when function finished
     # this cumbersome construction is due to plac annotations
-    stemmer = True if stemmer == 'True' else False
+    stem = True if stem == 'True' else False
     subcats = True if subcats == 'True' else False
     loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
                                subcats=subcats, verbose=verbose)
@@ -56,8 +56,8 @@ def extract_features(qfile='question_train.csv',
     # tokens is the name of the first transformation in the pipeline
     model.set_params(tokens__mapdates=mapdates,
                      tokens__mapnumbers=mapnumbers,
-                     tokens__spellcorrector=spellcorrector,
-                     tokens__stemmer=stemmer,
+                     tokens__spellcorrect=spellcorrect,
+                     tokens__stem=stem,
                      tokens__tokenizer=tokenizer,
                      vectorize__binary=binary,
                      vectorize__min_df=min_df)
