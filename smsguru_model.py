@@ -62,7 +62,7 @@ def evaluate_model(qfile='question_train.csv',
     N_DIM_OPTIONS = [500]
     # for multiclass it holds:
     # recall_micro = precision_micro = f1_micro = accuracy
-    SCORES = ['recall_macro', 'precision_macro', 'f2_macro', 'f1_micro']
+    SCORES = ['recall_macro', 'precision_macro', 'f1_macro', 'f1_micro']
     # this choice is based on [Seb99]
     MIN_DF = [1, 2, 3]
 
