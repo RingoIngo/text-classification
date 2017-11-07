@@ -66,7 +66,8 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
                               (u'ß', 'ss')]
     date_patterns = ["%d-%m-%Y", "%d-%m-%y", "%Y-%m-%d", "%y-%m-%d",
                      "%d/%m/%Y", "%d/%m/%y", "%Y/%m/%d", "%y/%m/%d",
-                     "%d.%m.%Y", "%d.%m.%y", "%Y.%m.%d", "%y.%m.%d"]
+                     "%d.%m.%Y", "%d.%m.%y", "%Y.%m.%d", "%y.%m.%d",
+                     "%Y"]
 
     def __init__(self, mapdates=True, mapnumbers=False, spellcorrector=False,
                  stemmer=True, tokenizer='word_tokenizer'):

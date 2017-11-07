@@ -15,6 +15,7 @@ import question_loader as ql
 @plac.annotations(
     binary=(None, 'flag', 'bi'),
     dim=(None, 'option', None, int),
+    # TODO: this doest work in terminal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     mapdates=(None, 'option', 'md'),
     mapnumbers=(None, 'option', 'mn'),
     reduce_dim=(None, 'option', 're_d', str, ['chi2', 'trunSVD', 'None']),
