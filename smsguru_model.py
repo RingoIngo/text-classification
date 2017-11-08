@@ -14,7 +14,7 @@ from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn.feature_selection import SelectKBest, chi2
-from sklearn.neighbors import KNeighborsClassifier
+# from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
 
 import text_tokenizer_and_cleaner as ttc
@@ -64,13 +64,13 @@ class ItemSelector(BaseEstimator, TransformerMixin):
 
 
 class ListVectorizer(BaseEstimator, TransformerMixin):
-    """Vectorize a list of features.
+    """vectorize a list of features.
 
-    Convert a list of numerical features into the from scikit expected format.
-    This list is expected to have a length equal to the number of samples.
-    Returns a 2-D array, since format (n,) throws an exception in scikit.
-    Type of the return array must be float.
-    See also:
+    convert a list of numerical features into the from scikit expected format.
+    this list is expected to have a length equal to the number of samples.
+    returns a 2-D array, since format (n,) throws an exception in scikit.
+    type of the return array must be float.
+    see also:
 
     https://stackoverflow.com/questions/22273242/
     scipy-hstack-results-in-typeerror-no-supported-conversion
@@ -90,9 +90,9 @@ class ListVectorizer(BaseEstimator, TransformerMixin):
 
 
 class QuestionTimeExtractor(BaseEstimator, TransformerMixin):
-    """Extract the question & date.
+    """extract the question & date.
 
-    Takes a list of tuples (question, creation_date) and produces a dict of
+    takes a list of tuples (question, creation_date) and produces a dict of
     sequences.  Keys are `question` and `time`.
     """
     def fit(self, x, y=None):
@@ -111,6 +111,11 @@ class QuestionTimeExtractor(BaseEstimator, TransformerMixin):
 
 def _identity(words):
     return words
+
+
+# for multiclass it holds:
+# recall_micro = precision_micro = f1_micro = accuracy
+SCORES = ['recall_macro', 'precision_macro', 'f1_macro', 'f1_micro']
 
 
 class SMSGuruModel:
@@ -133,10 +138,12 @@ class SMSGuruModel:
         in the chain. Default is None.
     """
 
-    def __init__(self, classifier=None):
+    def __init__(self, classifier=MultinomialNB()):
         self.classifier = classifier
+        self.model = self._build(self.classifier)
+        self.fitted = False
 
-    def build(self):
+    def _build(self, classifier):
         steps = [
             # Extract the question & its creation time
             ('question_time', QuestionTimeExtractor()),
@@ -168,62 +175,116 @@ class SMSGuruModel:
             )),
         ]
 
-        if self.classifier is not None:
+        if classifier is not None:
             # Add a classifier to the combined features
-            steps.append(('classifier', self.classifier))
+            steps.append(('classifier', classifier))
 
-        self.model = Pipeline(steps)
+        return Pipeline(steps)
+
+    def get_feature_names(self):
+        if not self.fitted:
+            print("invoke fit_transform first!")
+            return
+
+        if (self.model.named_steps['union'].transformer_list[0][1].
+                named_steps['reduce_dim'] is None):
+            featurenames = (self.model.named_steps['union'].
+                            transformer_list[0][1].named_steps['vectorize'].
+                            get_feature_names())
+        elif (isinstance(self.model.named_steps['union'].
+                         transformer_list[0][1].named_steps['reduce_dim'],
+                         TruncatedSVD)):
+            print("SVD")
+        elif (isinstance(self.model.named_steps['union'].
+                         transformer_list[0][1].named_steps['reduce_dim'],
+                         SelectKBest)):
+            print("SelectkBest")
+        return None
+
+    def set_question_loader(self, qfile='question_train.csv',
+                            catfile='category.csv',
+                            subcats=True,
+                            metadata=True,
+                            verbose=False,
+                            ):
+        self.question_loader_ = ql.QuestionLoader(qfile=qfile,
+                                                  catfile=catfile,
+                                                  subcats=subcats,
+                                                  metadata=metadata,
+                                                  verbose=verbose)
+        return self
+
+    def fit_transform(self):
+        if not hasattr(self, 'question_loader_'):
+            print("Set question loader first!")
+            return
+
+        self.fitted = True
+        return self.model.fit_transform(self.question_loader_.questions,
+                                        self.question_loader_.categoryids)
+
+    def gridsearch(self, param_grid, verbose=10, CV=5, n_jobs=1):
+        if not hasattr(self, 'question_loader_'):
+            print("Set question loader first!")
+            return
+
+        self.CV_ = CV
+        # TODO: n_jobs could be an interesting option when on cluster
+        self.n_jobs = n_jobs
+        self.param_grid_ = param_grid
+
+        self.grid_search_ = GridSearchCV(self.model, cv=self.CV_,
+                                         param_grid=self.param_grid_,
+                                         return_train_score=True,
+                                         scoring=SCORES,
+                                         refit=False,
+                                         verbose=verbose)
+
+        self.grid_search_.fit(self.question_loader_.questions,
+                              self.question_loader_.categoryids)
         return self
 
 
-def evaluate_model(qfile='question_train.csv',
-                   catfile='category.csv',
-                   subcats=True,
-                   metadata=True,
-                   verbose=10):
-    CV = 5
+if __name__ == "__main__":
+    classifier = MultinomialNB()
+
     # the dimensions used in the dim reduction step
     N_DIM_OPTIONS = [500]
-    # for multiclass it holds:
-    # recall_micro = precision_micro = f1_micro = accuracy
-    SCORES = ['recall_macro', 'precision_macro', 'f1_macro', 'f1_micro']
+
     # this choice is based on [Seb99]
     MIN_DF = [1, 2, 3]
 
-    # model = create_pipeline(KNeighborsClassifier())
-    model = create_pipeline(classifier=MultinomialNB())
-    # param_grid = [
-    #     # multivariate feature selection
-    #     dict(union__question_bow__tokens__mapdates=[True, False],
-    #          union__question_bow__tokens__mapnumbers=[True, False],
-    #          union__question_bow__tokens__spellcorrect=[True, False],
-    #          union__question_bow__tokens__stem=[True, False],
-    #          union__question_bow__tokens__tokenizer=['word_tokenizer',
-    #                             'word_punct_tokenizer'],
-    #          union__question_bow__vectorize__binary=[True, False],
-    #          union__question_bow__vectorize__min_df=MIN_DF,
-    #          union__question_bow__tfidf=[None, TfidfTransformer()],
-    #          union__question_bow__reduce_dim=[TruncatedSVD()],
-    #          union__question_bow__reduce_dim__n_components=N_DIM_OPTIONS
-    #          ),
-    #     # univariate feature selection
-    #     dict(union__question_bow__tokens__mapdates=[True, False],
-    #          union__question_bow__tokens__mapnumbers=[True, False],
-    #          union__question_bow__tokens__spellcorrect=[False],
-    #          union__question_bow__tokens__stem=[True, False],
-    #          union__question_bow__tokens__tokenizer=['word_tokenizer',
-    #                             'word_punct_tokenizer'],
-    #          union__question_bow__vectorize__binary=[True, False],
-    #          union__question_bow__vectorize__min_df=MIN_DF,
-    #          union__question_bow__tfidf=[None, TfidfTransformer()],
-    #          union__question_bow__reduce_dim=[SelectKBest(chi2)],
-    #          union__question_bow__reduce_dim__k=N_DIM_OPTIONS,
-    #          )
-    # ]
-    # TODO: n_jobs could be an interesting option when on cluster
+    param_grid = [
+        # multivariate feature selection
+        dict(union__question_bow__tokens__mapdates=[True, False],
+             union__question_bow__tokens__mapnumbers=[True, False],
+             union__question_bow__tokens__spellcorrect=[True, False],
+             union__question_bow__tokens__stem=[True, False],
+             union__question_bow__tokens__tokenizer=['word_tokenizer',
+                                                     'word_punct_tokenizer'],
+             union__question_bow__vectorize__binary=[True, False],
+             union__question_bow__vectorize__min_df=MIN_DF,
+             union__question_bow__tfidf=[None, TfidfTransformer()],
+             union__question_bow__reduce_dim=[TruncatedSVD()],
+             union__question_bow__reduce_dim__n_components=N_DIM_OPTIONS
+             ),
+        # univariate feature selection
+        dict(union__question_bow__tokens__mapdates=[True, False],
+             union__question_bow__tokens__mapnumbers=[True, False],
+             union__question_bow__tokens__spellcorrect=[False],
+             union__question_bow__tokens__stem=[True, False],
+             union__question_bow__tokens__tokenizer=['word_tokenizer',
+                                                     'word_punct_tokenizer'],
+             union__question_bow__vectorize__binary=[True, False],
+             union__question_bow__vectorize__min_df=MIN_DF,
+             union__question_bow__tfidf=[None, TfidfTransformer()],
+             union__question_bow__reduce_dim=[SelectKBest(chi2)],
+             union__question_bow__reduce_dim__k=N_DIM_OPTIONS,
+             ),
+    ]
 
     # TEST
-    param_grid = [
+    test_param_grid = [
         dict(union__question_bow__tokens__mapdates=[False],
              union__question_bow__tokens__mapnumbers=[False],
              union__question_bow__tokens__spellcorrect=[False],
@@ -234,24 +295,11 @@ def evaluate_model(qfile='question_train.csv',
              union__question_bow__tfidf=[None],
              union__question_bow__reduce_dim=[SelectKBest(chi2)],
              union__question_bow__reduce_dim__k=[500],
-             )
+             ),
     ]
-    grid_search = GridSearchCV(model, cv=CV,
-                               param_grid=param_grid,
-                               return_train_score=True,
-                               scoring=SCORES,
-                               refit=False,
-                               verbose=verbose)
-    loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
-                               subcats=subcats,
-                               metadata=metadata,
-                               verbose=verbose)
-    grid_search.fit(loader.questions, loader.categoryids)
-    return grid_search
 
-
-if __name__ == "__main__":
-    gridsearch = evaluate_model()
+    sms_guru_model = (SMSGuruModel(classifier=classifier).
+                      set_question_loader().gridsearch(test_param_grid))
     current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     np.save('./results/gridsearch/' + current_time + 'grids_cv.npy',
-            gridsearch.cv_results_)
+            sms_guru_model.grid_search_.cv_results_)

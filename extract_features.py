@@ -9,8 +9,7 @@ import numpy as np
 import plac
 import pdb
 
-import smsguru_model
-import question_loader as ql
+from smsguru_model import SMSGuruModel
 
 
 @plac.annotations(
@@ -51,74 +50,81 @@ def extract_features(qfile='question_train.csv',
     # this cumbersome construction is due to plac annotations
     stem = True if stem == 'True' else False
     subcats = True if subcats == 'True' else False
-    loader = ql.QuestionLoader(qfile=qfile, catfile=catfile,
-                               metadata=metadata,
-                               subcats=subcats,
-                               verbose=verbose)
-    model = smsguru_model.create_pipeline()
+    sms_guru_model = SMSGuruModel(classifier=None).set_question_loader(
+                                                        qfile=qfile,
+                                                        catfile=catfile,
+                                                        metadata=metadata,
+                                                        subcats=subcats,
+                                                        verbose=verbose,
+                                                        )
     # tokens is the name of the first transformation in the pipeline
-    model.set_params(union__question_bow__tokens__mapdates=mapdates,
-                     union__question_bow__tokens__mapnumbers=mapnumbers,
-                     union__question_bow__tokens__spellcorrect=spellcorrect,
-                     union__question_bow__tokens__stem=stem,
-                     union__question_bow__tokens__tokenizer=tokenizer,
-                     union__question_bow__vectorize__binary=binary,
-                     union__question_bow__vectorize__min_df=min_df,
-                     )
+    sms_guru_model.model.set_params(
+        union__question_bow__tokens__mapdates=mapdates,
+        union__question_bow__tokens__mapnumbers=mapnumbers,
+        union__question_bow__tokens__spellcorrect=spellcorrect,
+        union__question_bow__tokens__stem=stem,
+        union__question_bow__tokens__tokenizer=tokenizer,
+        union__question_bow__vectorize__binary=binary,
+        union__question_bow__vectorize__min_df=min_df,
+    )
     # metadata
     if not metadata:
-        model.set_params(union__creation_time=None)
+        sms_guru_model.model.set_params(union__creation_time=None)
     # term frequency weighting
     if not tfidf:
-        model.set_params(union__question_bow__tfidf=None)
+        sms_guru_model.model.set_params(union__question_bow__tfidf=None)
 
     # dimension reduction
     if reduce_dim == 'None':
-        model.set_params(union__question_bow__reduce_dim=None)
+        sms_guru_model.model.set_params(union__question_bow__reduce_dim=None)
     elif reduce_dim == 'trunSVD':
-        model.set_params(
+        sms_guru_model.model.set_params(
             union__question_bow__reduce_dim=TruncatedSVD(n_components=dim))
     elif reduce_dim == 'chi2':
-        model.set_params(
+        sms_guru_model.model.set_params(
             union__question_bow__reduce_dim=SelectKBest(chi2, k=dim))
 
-    # get features
-    features = model.fit_transform(loader.questions, loader.categoryids)
-    print(model)
-    # get feature names
-    if reduce_dim == 'None':
-        featurenames = model.named_steps['union'].transformer_list[0][1].named_steps['vectorize'].get_feature_names()
-        featurenames = np.asarray(featurenames)
-    elif reduce_dim == 'trunSVD':
-        # no interpretable feature names
-        featurenames = None
-    elif reduce_dim == 'chi2':
-        print(model.named_steps_)
-        featurenames = np.asarray(
-            model.named_steps[
-                'union__question_bow__vectorize'].get_feature_names())
-        featurenames = featurenames[
-            model.named_steps['union__question_bow__reduce_dim'].get_support()]
-
+#     # get features
+    features = sms_guru_model.fit_transform()
+#     print(model)
+#     # get feature names
+#     if reduce_dim == 'None':
+#         featurenames = model.named_steps['union'].transformer_list[0][1].named_steps['vectorize'].get_feature_names()
+#         featurenames = np.asarray(featurenames)
+#     elif reduce_dim == 'trunSVD':
+#         # no interpretable feature names
+#         featurenames = None
+#     elif reduce_dim == 'chi2':
+#         print(model.named_steps_)
+#         featurenames = np.asarray(
+#             model.named_steps[
+#                 'union__question_bow__vectorize'].get_feature_names())
+#         featurenames = featurenames[
+#             model.named_steps['union__question_bow__reduce_dim'].get_support()]
+# 
     # add meta data label
-    if metadata:
-        metadata_label = model.named_steps['union'].transformer_list[1][1].named_steps['vectorize'].get_feature_names()
+    featurenames = sms_guru_model.get_feature_names()
+    if metadata and featurenames is not None:
+        metadata_label = sms_guru_model.model.named_steps['union'].transformer_list[1][1].named_steps['vectorize'].get_feature_names()
         featurenames = np.asarray(featurenames.tolist() + metadata_label)
 
     if verbose:
         print("feature matrix size {}".format(features.T.shape))
         print("featurenames size {}".format(len(featurenames)))
-        print("categoryids size {}".format(len(loader.categoryids)))
-        print("categories size: {}".format(len(loader.categories)))
-        print("number of questions: {}".format(len(loader.questions)))
+        print("categoryids size {}".format(
+            len(sms_guru_model.question_loader_.categoryids)))
+        print("categories size: {}".format(
+            len(sms_guru_model.question_loader_.categories)))
+        print("number of questions: {}".format(
+            len(sms_guru_model.question_loader_.questions)))
         print("filtered because of min_df = {}:".format(min_df))
         # print(model.named_steps['vectorize'].stop_words_)
         print("feature names: {}".format(featurenames))
     # save extracted features
     np.savez(outfile, features=features.T.toarray(),
              featurenames=featurenames,
-             categoryids=loader.categoryids[None, :],
-             categories=loader.categories)
+             categoryids=sms_guru_model.question_loader_.categoryids[None, :],
+             categories=sms_guru_model.question_loader_.categories)
 
 
 # run extract_features method if module is executed as a script
