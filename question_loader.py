@@ -6,6 +6,7 @@ and the properties of the question files
 
 import csv
 import pprint
+from datetime import datetime
 import operator
 import numpy as np
 
@@ -30,6 +31,14 @@ class QuestionLoader(object):
         and a parent_id (int). If the parent_id eqauals zero the
         category has no parent.
 
+    metadata : boolean, determines if also the creation date of the sample
+        is extracted. Using the metadata option may reduce the
+        number of samples that can be used, since they must
+        have a valid date format in the `created_at` section.
+        This also means that the resulting classifier can only be
+        used on samples with valid date format. In case of the default sample
+        data this is a reduction of 36 samples. Dafault is False.
+
     subcats : boolean which determines if the in qfile specified
         subcategory or its parent category is assigned to a question.
 
@@ -39,17 +48,24 @@ class QuestionLoader(object):
 
     def __init__(self, qfile='question_train.csv',
                  catfile='category.csv',
-                 metadata=True,
+                 metadata=False,
                  subcats=True,
                  verbose=False):
         self.qfile = qfile
         self.catfile = catfile
-        self.metadata = metadata,
+        self.metadata = metadata
         self.subcats = subcats
         self.categories, self.parentdictionary = self._read_category_file(
             verbose)
         self.questions, self.categoryids = self._read_question_file(verbose)
         self.category_counts = self._get_category_counts(verbose)
+        if verbose and self.metadata:
+            print("""Warning: Using the metadata option may reduce the
+                  number of samples that can be used, since they must
+                  have a valid date format in the `created_at` section.
+                  This also means that the resulting classifier can only be
+                  used on samples with valid date format. In case of the
+                  default sample data this is a reduction of 36 samples.""")
 
     def _read_category_file(self, verbose):
         """read categoriy_id, parent_id and category_name from file
@@ -70,9 +86,11 @@ class QuestionLoader(object):
         with open(self.catfile, 'rU') as f:
             reader = csv.reader(f, quotechar='"', delimiter=',')
             f_header = next(reader)
+
             category_id_idx = f_header.index("category_id")
             parent_id_idx = f_header.index("parent_id")
             category_name_idx = f_header.index("category_name")
+
             nsyntax_errors = 0
             for row in reader:
                 # filter category "n" and junk
@@ -119,9 +137,11 @@ class QuestionLoader(object):
         with open(self.qfile, 'rU') as f:
             reader = csv.reader(f, quotechar='"', delimiter=',')
             f_header = next(reader)
+
             category_main_id_idx = f_header.index("category_main_id")
             question_idx = f_header.index("question")
             created_at_idx = f_header.index("created_at")
+
             questions = []
             categoryids = []
             nsyntax_errors = 0
@@ -130,7 +150,8 @@ class QuestionLoader(object):
                     category_main_id = int(row[category_main_id_idx])
                     question = row[question_idx]
                     if self.metadata:
-                        date = row[created_at_idx]
+                        date = datetime.strptime(row[created_at_idx],
+                                                 "%Y-%m-%d %H:%M:%S")
                         data = {'question': question, 'date': date}
                     else:
                         data = {'question': question}
@@ -160,7 +181,7 @@ class QuestionLoader(object):
 
 
 if __name__ == "__main__":
-    q = QuestionLoader()
+    q = QuestionLoader(metadata=True, verbose=True)
     print("nquestions metadata True: {}".format(len(q.questions)))
     q2 = QuestionLoader(metadata=False)
     print("nquestions metadata False: {}".format(len(q2.questions)))
