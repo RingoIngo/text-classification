@@ -18,6 +18,75 @@ from sklearn.naive_bayes import MultinomialNB
 import text_tokenizer_and_cleaner as ttc
 import question_loader as ql
 
+# taken from scikit learn examples:
+# "Feature Union with Heterogeneous Data Sources"
+class ItemSelector(BaseEstimator, TransformerMixin):
+    """For data grouped by feature, select subset of data at a provided key.
+
+    The data is expected to be stored in a 2D data structure, where the first
+    index is over features and the second is over samples.  i.e.
+
+    >> len(data[key]) == n_samples
+
+    Please note that this is the opposite convention to scikit-learn feature
+    matrixes (where the first index corresponds to sample).
+
+    ItemSelector only requires that the collection implement getitem
+    (data[key]).  Examples include: a dict of lists, 2D numpy array, Pandas
+    DataFrame, numpy record array, etc.
+
+    >> data = {'a': [1, 5, 2, 5, 2, 8],
+               'b': [9, 4, 1, 4, 1, 3]}
+    >> ds = ItemSelector(key='a')
+    >> data['a'] == ds.transform(data)
+
+    ItemSelector is not designed to handle data grouped by sample.  (e.g. a
+    list of dicts).  If your data is structured this way, consider a
+    transformer along the lines of `sklearn.feature_extraction.DictVectorizer`.
+
+    Parameters
+    ----------
+    key : hashable, required
+        The key corresponding to the desired value in a mappable.
+    """
+    def __init__(self, key):
+        self.key = key
+
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, data_dict):
+        return data_dict[self.key]
+
+
+class SubjectBodyExtractor(BaseEstimator, TransformerMixin):
+    """Extract the subject & body from a usenet post in a single pass.
+
+    Takes a sequence of strings and produces a dict of sequences.  Keys are
+    `subject` and `body`.
+    """
+    def fit(self, x, y=None):
+        return self
+
+    def transform(self, posts):
+        features = np.recarray(shape=(len(posts),),
+                               dtype=[('subject', object), ('body', object)])
+        for i, text in enumerate(posts):
+            headers, _, bod = text.partition('\n\n')
+            bod = strip_newsgroup_footer(bod)
+            bod = strip_newsgroup_quoting(bod)
+            features['body'][i] = bod
+
+            prefix = 'Subject:'
+            sub = ''
+            for line in headers.split('\n'):
+                if line.startswith(prefix):
+                    sub = line[len(prefix):]
+                    break
+            features['subject'][i] = sub
+
+        return features
+
 
 def _identity(words):
     return words
@@ -41,7 +110,8 @@ def create_pipeline(estimator=None):
 
     steps = [
         ('tokens', ttc.TextTokenizerAndCleaner()),
-        ('vectorize', CountVectorizer(tokenizer=_identity, preprocessor=None,
+        ('vectorize', CountVectorizer(tokenizer=_identity,
+                                      preprocessor=None,
                                       lowercase=False)),
         ('tfidf', TfidfTransformer()),
         ('reduce_dim', SelectKBest(chi2, k=500))

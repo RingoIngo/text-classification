@@ -39,10 +39,12 @@ class QuestionLoader(object):
 
     def __init__(self, qfile='question_train.csv',
                  catfile='category.csv',
+                 metadata=True,
                  subcats=True,
                  verbose=False):
         self.qfile = qfile
         self.catfile = catfile
+        self.metadata = metadata,
         self.subcats = subcats
         self.categories, self.parentdictionary = self._read_category_file(
             verbose)
@@ -119,6 +121,7 @@ class QuestionLoader(object):
             f_header = next(reader)
             category_main_id_idx = f_header.index("category_main_id")
             question_idx = f_header.index("question")
+            created_at_idx = f_header.index("created_at")
             questions = []
             categoryids = []
             nsyntax_errors = 0
@@ -126,7 +129,12 @@ class QuestionLoader(object):
                 try:
                     category_main_id = int(row[category_main_id_idx])
                     question = row[question_idx]
-                    questions.append(question)
+                    if self.metadata:
+                        date = row[created_at_idx]
+                        data = {'question': question, 'date': date}
+                    else:
+                        data = {'question': question}
+                    questions.append(data)
                     if self.subcats:
                         categoryids.append(category_main_id)
                     else:
@@ -149,3 +157,10 @@ class QuestionLoader(object):
             pprint.pprint(sorted(category_counts.items(),
                                  key=operator.itemgetter(1), reverse=True))
         return category_counts
+
+
+if __name__ == "__main__":
+    q = QuestionLoader()
+    print("nquestions metadata True: {}".format(len(q.questions)))
+    q2 = QuestionLoader(metadata=False)
+    print("nquestions metadata False: {}".format(len(q2.questions)))
