@@ -84,6 +84,10 @@ class ListVectorizer(BaseEstimator, TransformerMixin):
         feature_vector = np.asarray(feature_list).reshape(len(feature_list), 1)
         return feature_vector.astype(float)
 
+    def get_feature_names(self):
+        """Return the name of the feature: `CREATION_DATE`"""
+        return ['CREATION_DATE']
+
 
 class QuestionTimeExtractor(BaseEstimator, TransformerMixin):
     """Extract the question & date.
