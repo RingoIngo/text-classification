@@ -85,8 +85,8 @@ class ListVectorizer(BaseEstimator, TransformerMixin):
         return feature_vector.astype(float)
 
     def get_feature_names(self):
-        """Return the name of the feature: `CREATION_DATE`"""
-        return ['CREATION_DATE']
+        """Return the name of the feature: `CREATION_HOUR`"""
+        return ['CREATION_HOUR']
 
 
 class QuestionTimeExtractor(BaseEstimator, TransformerMixin):
@@ -113,7 +113,7 @@ def _identity(words):
     return words
 
 
-def create_pipeline(classifier=None):
+class SMSGuruModel:
     """Chain processing steps
 
     Build a `Pipeline` in which all processing steps are chained.
@@ -133,41 +133,47 @@ def create_pipeline(classifier=None):
         in the chain. Default is None.
     """
 
-    steps = [
-        # Extract the question & its creation time
-        ('question_time', QuestionTimeExtractor()),
+    def __init__(self, classifier=None):
+        self.classifier = classifier
 
-        # Use FeatureUnion to combine the features from question and time
-        ('union', FeatureUnion(
-            transformer_list=[
+    def build(self):
+        steps = [
+            # Extract the question & its creation time
+            ('question_time', QuestionTimeExtractor()),
 
-                # Pipeline for pulling features from the question itself
-                ('question_bow', Pipeline([
-                    ('selector', ItemSelector(key='question')),
-                    ('tokens', ttc.TextTokenizerAndCleaner()),
-                    ('vectorize', CountVectorizer(tokenizer=_identity,
-                                                  preprocessor=None,
-                                                  lowercase=False)),
-                    ('tfidf', TfidfTransformer()),
-                    ('reduce_dim', SelectKBest(chi2, k=500)),
-                ])),
+            # Use FeatureUnion to combine the features from question and time
+            ('union', FeatureUnion(
+                transformer_list=[
 
-                # Pipeline for creation time
-                ('creation_time', Pipeline([
-                    ('selector', ItemSelector(key='time')),
-                    ('vectorize', ListVectorizer()),
-                ])),
-            ],
+                    # Pipeline for pulling features from the question itself
+                    ('question_bow', Pipeline([
+                        ('selector', ItemSelector(key='question')),
+                        ('tokens', ttc.TextTokenizerAndCleaner()),
+                        ('vectorize', CountVectorizer(tokenizer=_identity,
+                                                      preprocessor=None,
+                                                      lowercase=False)),
+                        ('tfidf', TfidfTransformer()),
+                        ('reduce_dim', SelectKBest(chi2, k=500)),
+                    ])),
 
-            # weight components in FeatureUnion
-            transformer_weights=None,
-        )),
-    ]
+                    # Pipeline for creation time
+                    ('creation_time', Pipeline([
+                        ('selector', ItemSelector(key='time')),
+                        ('vectorize', ListVectorizer()),
+                    ])),
+                ],
 
-    if classifier is not None:
-        # Add a classifier to the combined features
-        steps.append(('classifier', classifier))
-    return Pipeline(steps)
+                # weight components in FeatureUnion
+                transformer_weights=None,
+            )),
+        ]
+
+        if self.classifier is not None:
+            # Add a classifier to the combined features
+            steps.append(('classifier', self.classifier))
+
+        self.model = Pipeline(steps)
+        return self
 
 
 def evaluate_model(qfile='question_train.csv',
