@@ -18,6 +18,7 @@ from smsguru_model import SMSGuruModel
     # TODO: this doest work in terminal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     mapdates=(None, 'option', 'md'),
     mapnumbers=(None, 'option', 'mn'),
+    metadata=(None, 'flag'),
     reduce_dim=(None, 'option', 're_d', str, ['chi2', 'trunSVD', 'None']),
     spellcorrect=(None, 'flag', 'sp'),
     stem=plac.Annotation(None, 'option', None, str, ['True', 'False']),
@@ -34,7 +35,7 @@ def extract_features(qfile='question_train.csv',
                      dim=500,
                      mapdates=True,
                      mapnumbers=False,
-                     metadata=True,
+                     metadata=False,
                      reduce_dim='chi2',
                      spellcorrect=False,
                      stem='True',
@@ -50,13 +51,9 @@ def extract_features(qfile='question_train.csv',
     # this cumbersome construction is due to plac annotations
     stem = True if stem == 'True' else False
     subcats = True if subcats == 'True' else False
-    sms_guru_model = SMSGuruModel(classifier=None).set_question_loader(
-                                                        qfile=qfile,
-                                                        catfile=catfile,
-                                                        metadata=metadata,
-                                                        subcats=subcats,
-                                                        verbose=verbose,
-                                                        )
+    sms_guru_model = SMSGuruModel(classifier=None, metadata=metadata)
+    sms_guru_model.set_question_loader(qfile=qfile, catfile=catfile,
+                                       subcats=subcats, verbose=verbose)
     # tokens is the name of the first transformation in the pipeline
     sms_guru_model.model.set_params(
         union__question_bow__tokens__mapdates=mapdates,
@@ -68,8 +65,8 @@ def extract_features(qfile='question_train.csv',
         union__question_bow__vectorize__min_df=min_df,
     )
     # metadata
-    if not metadata:
-        sms_guru_model.model.set_params(union__creation_time=None)
+    # if not metadata:
+    #     sms_guru_model.model.set_params(union__creation_time=None)
     # term frequency weighting
     if not tfidf:
         sms_guru_model.model.set_params(union__question_bow__tfidf=None)
@@ -84,29 +81,9 @@ def extract_features(qfile='question_train.csv',
         sms_guru_model.model.set_params(
             union__question_bow__reduce_dim=SelectKBest(chi2, k=dim))
 
-#     # get features
+    # get features
     features = sms_guru_model.fit_transform()
-#     print(model)
-#     # get feature names
-#     if reduce_dim == 'None':
-#         featurenames = model.named_steps['union'].transformer_list[0][1].named_steps['vectorize'].get_feature_names()
-#         featurenames = np.asarray(featurenames)
-#     elif reduce_dim == 'trunSVD':
-#         # no interpretable feature names
-#         featurenames = None
-#     elif reduce_dim == 'chi2':
-#         print(model.named_steps_)
-#         featurenames = np.asarray(
-#             model.named_steps[
-#                 'union__question_bow__vectorize'].get_feature_names())
-#         featurenames = featurenames[
-#             model.named_steps['union__question_bow__reduce_dim'].get_support()]
-# 
-    # add meta data label
     featurenames = sms_guru_model.get_feature_names()
-    if metadata and featurenames is not None:
-        metadata_label = sms_guru_model.model.named_steps['union'].transformer_list[1][1].named_steps['vectorize'].get_feature_names()
-        featurenames = np.asarray(featurenames.tolist() + metadata_label)
 
     if verbose:
         print("feature matrix size {}".format(features.T.shape))
