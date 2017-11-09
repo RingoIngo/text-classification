@@ -489,7 +489,8 @@ if __name__ == "__main__":
              union__question_bow__reduce_dim__n_components=N_DIM_OPTIONS)
     )
 
-    grid = [{**base_grid, **univariate}, {**base_grid, **multivariate}]
+    grid = [merge_two_dicts(base_grid, univariate),
+            merge_two_dicts(base_grid, multivariate)]
 
     # TEST
     test_param_grid = [
