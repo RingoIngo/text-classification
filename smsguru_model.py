@@ -489,7 +489,7 @@ if __name__ == "__main__":
     ]
 
     # options that need more computation time
-    test_cluster_param_grid = [
+    test_clust_param_grid = [
         dict(union__question_bow__tokens__mapdates=[True],
              union__question_bow__tokens__mapnumbers=[True],
              union__question_bow__tokens__spellcorrect=[True],
@@ -504,7 +504,7 @@ if __name__ == "__main__":
     ]
 
     sms_guru_model = (SMSGuruModel(classifier=classifier).
-                      set_question_loader().gridsearch(test_param_grid))
+                      set_question_loader().gridsearch(test_clust_param_grid))
     current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     np.save('./results/gridsearch/' + current_time + 'grids_cv.npy',
             sms_guru_model.grid_search_.cv_results_)
