@@ -488,6 +488,21 @@ if __name__ == "__main__":
              ),
     ]
 
+    # options that need more computation time
+    test_cluster_param_grid = [
+        dict(union__question_bow__tokens__mapdates=[True],
+             union__question_bow__tokens__mapnumbers=[True],
+             union__question_bow__tokens__spellcorrect=[True],
+             union__question_bow__tokens__stem=[True],
+             union__question_bow__tokens__tokenizer=['word_punct_tokenizer'],
+             union__question_bow__vectorize__binary=[False],
+             union__question_bow__vectorize__min_df=[1, 2],
+             union__question_bow__tfidf=[None],
+             union__question_bow__reduce_dim=[SelectKBest(chi2)],
+             union__question_bow__reduce_dim__k=[1000],
+             ),
+    ]
+
     sms_guru_model = (SMSGuruModel(classifier=classifier).
                       set_question_loader().gridsearch(test_param_grid))
     current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
