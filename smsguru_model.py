@@ -450,6 +450,12 @@ class SMSGuruModel:
 
 
 if __name__ == "__main__":
+    def merge_two_dicts(x, y):
+        """Return merged dict"""
+        z = x.copy()
+        z.update(y)
+        return z
+
     classifier = MultinomialNB()
     subcats = False
     metadata = False
