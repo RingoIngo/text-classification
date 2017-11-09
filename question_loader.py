@@ -150,11 +150,13 @@ class QuestionLoader(object):
                     category_main_id = int(row[category_main_id_idx])
                     question = row[question_idx]
                     if self.metadata:
-                        date = datetime.strptime(row[created_at_idx],
-                                                 "%Y-%m-%d %H:%M:%S")
-                        data = {'question': question, 'date': date}
+                        created_at = datetime.strptime(row[created_at_idx],
+                                                       "%Y-%m-%d %H:%M:%S")
+                    # the model expects a date key even if not used
                     else:
-                        data = {'question': question}
+                        created_at = None
+
+                    data = {'question': question, 'created_at': created_at}
                     questions.append(data)
                     if self.subcats:
                         categoryids.append(category_main_id)
