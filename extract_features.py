@@ -64,9 +64,6 @@ def extract_features(qfile='question_train.csv',
         union__question_bow__vectorize__binary=binary,
         union__question_bow__vectorize__min_df=min_df,
     )
-    # metadata
-    # if not metadata:
-    #     sms_guru_model.model.set_params(union__creation_time=None)
     # term frequency weighting
     if not tfidf:
         sms_guru_model.model.set_params(union__question_bow__tfidf=None)
@@ -81,7 +78,6 @@ def extract_features(qfile='question_train.csv',
         sms_guru_model.model.set_params(
             union__question_bow__reduce_dim=SelectKBest(chi2, k=dim))
 
-    # get features
     features = sms_guru_model.fit_transform()
     featurenames = sms_guru_model.get_feature_names()
 
@@ -95,7 +91,7 @@ def extract_features(qfile='question_train.csv',
         print("number of questions: {}".format(
             len(sms_guru_model.question_loader_.questions)))
         print("filtered because of min_df = {}:".format(min_df))
-        # print(model.named_steps['vectorize'].stop_words_)
+        print(sms_guru_model.get_filtered_words())
         print("feature names: {}".format(featurenames))
     # save extracted features
     np.savez(outfile, features=features.T.toarray(),

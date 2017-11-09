@@ -5,6 +5,7 @@ sms guru data set. The most important class is the SMSGuruModel.
 # Author: Ingo Gühring
 
 from time import gmtime, strftime
+from itertools import compress
 import numpy as np
 
 from sklearn.decomposition import TruncatedSVD
@@ -318,7 +319,7 @@ class SMSGuruModel:
             feature_mask = (self.model.named_steps['union'].
                             transformer_list[0][1].named_steps['reduce_dim'].
                             get_support())
-            featurenames = featurenames[feature_mask]
+            featurenames = list(compress(featurenames, feature_mask))
 
         if ((self.model.named_steps['union'].transformer_list[1][1]
                 is not None) and featurenames is not None):
@@ -328,6 +329,19 @@ class SMSGuruModel:
             featurenames = featurenames + metadata_label
 
         return np.asarray(featurenames)
+
+    def get_filtered_words(self):
+        """Return by min document frequency filtered words.
+
+        Returns
+        ----------
+        filtered_words: list, words that were filtered because the df attribut
+            of the vectorizer in bow was set higher than one.
+        """
+        filtered_words = (self.model.named_steps['union'].
+                          transformer_list[0][1].named_steps['vectorize'].
+                          stop_words_)
+        return filtered_words
 
     def set_question_loader(self, qfile='question_train.csv',
                             catfile='category.csv',
@@ -437,41 +451,39 @@ class SMSGuruModel:
 
 if __name__ == "__main__":
     classifier = MultinomialNB()
-
+    subcats = False
+    metadata = False
     # the dimensions used in the dim reduction step
-    N_DIM_OPTIONS = [500]
+    N_DIM_OPTIONS = [10, 30, 60, 100, 200, 500, 1000, 1500, 2500, 5000]
 
     # this choice is based on [Seb99]
     MIN_DF = [1, 2, 3]
 
-    param_grid = [
-        # multivariate feature selection
+    base_grid = (
         dict(union__question_bow__tokens__mapdates=[True, False],
              union__question_bow__tokens__mapnumbers=[True, False],
              union__question_bow__tokens__spellcorrect=[True, False],
              union__question_bow__tokens__stem=[True, False],
-             union__question_bow__tokens__tokenizer=['word_tokenizer',
-                                                     'word_punct_tokenizer'],
-             union__question_bow__vectorize__binary=[True, False],
+             # union__question_bow__tokens__tokenizer=['word_tokenizer',
+             #                                         'word_punct_tokenizer'],
+             union__question_bow__tokens__tokenizer=['word_punct_tokenizer'],
+             # union__question_bow__vectorize__binary=[True, False],
              union__question_bow__vectorize__min_df=MIN_DF,
              union__question_bow__tfidf=[None, TfidfTransformer()],
-             union__question_bow__reduce_dim=[TruncatedSVD()],
-             union__question_bow__reduce_dim__n_components=N_DIM_OPTIONS
-             ),
-        # univariate feature selection
-        dict(union__question_bow__tokens__mapdates=[True, False],
-             union__question_bow__tokens__mapnumbers=[True, False],
-             union__question_bow__tokens__spellcorrect=[False],
-             union__question_bow__tokens__stem=[True, False],
-             union__question_bow__tokens__tokenizer=['word_tokenizer',
-                                                     'word_punct_tokenizer'],
-             union__question_bow__vectorize__binary=[True, False],
-             union__question_bow__vectorize__min_df=MIN_DF,
-             union__question_bow__tfidf=[None, TfidfTransformer()],
-             union__question_bow__reduce_dim=[SelectKBest(chi2)],
-             union__question_bow__reduce_dim__k=N_DIM_OPTIONS,
-             ),
-    ]
+             )
+    )
+
+    univariate = (
+        dict(union__question_bow__reduce_dim=[SelectKBest(chi2)],
+             union__question_bow__reduce_dim__k=N_DIM_OPTIONS)
+    )
+
+    multivariate = (
+        dict(union__question_bow__reduce_dim=[TruncatedSVD()],
+             union__question_bow__reduce_dim__n_components=N_DIM_OPTIONS)
+    )
+
+    grid = [{**base_grid, **univariate}, {**base_grid, **multivariate}]
 
     # TEST
     test_param_grid = [
@@ -484,27 +496,17 @@ if __name__ == "__main__":
              union__question_bow__vectorize__min_df=[1, 2],
              union__question_bow__tfidf=[None],
              union__question_bow__reduce_dim=[SelectKBest(chi2)],
-             union__question_bow__reduce_dim__k=[500],
+             union__question_bow__reduce_dim__k=[2000],
              ),
     ]
 
-    # options that need more computation time
-    test_clust_param_grid = [
-        dict(union__question_bow__tokens__mapdates=[True],
-             union__question_bow__tokens__mapnumbers=[True],
-             union__question_bow__tokens__spellcorrect=[True],
-             union__question_bow__tokens__stem=[True],
-             union__question_bow__tokens__tokenizer=['word_punct_tokenizer'],
-             union__question_bow__vectorize__binary=[False],
-             union__question_bow__vectorize__min_df=[1, 2],
-             union__question_bow__tfidf=[None],
-             union__question_bow__reduce_dim=[SelectKBest(chi2)],
-             union__question_bow__reduce_dim__k=[1000],
-             ),
-    ]
-
-    sms_guru_model = (SMSGuruModel(classifier=classifier).
-                      set_question_loader().gridsearch(test_clust_param_grid))
+    sms_guru_model = (SMSGuruModel(classifier=classifier, metadata=metadata).
+                      set_question_loader(subcats=subcats).
+                      gridsearch(test_param_grid))
     current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     np.save('./results/gridsearch/' + current_time + 'grids_cv.npy',
             sms_guru_model.grid_search_.cv_results_)
+    with open("./results/gridsearch/gridsearches.txt", "a") as report:
+        report.write("""performed at: {}, non_grid_params:  subcats: {},
+                      metadata: {}, classifier: MultinomialNB\n"""
+                     .format(current_time, subcats, metadata))
