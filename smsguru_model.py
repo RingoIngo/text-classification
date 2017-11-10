@@ -509,7 +509,7 @@ if __name__ == "__main__":
 
     sms_guru_model = (SMSGuruModel(classifier=classifier, metadata=metadata).
                       set_question_loader(subcats=subcats).
-                      gridsearch(grid))
+                      gridsearch(param_grid=test_param_grid, n_jobs=-1))
     current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     np.save('./results/gridsearch/' + current_time + 'grids_cv.npy',
             sms_guru_model.grid_search_.cv_results_)

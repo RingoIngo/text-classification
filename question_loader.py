@@ -8,6 +8,7 @@ import csv
 import pprint
 from datetime import datetime
 import operator
+import codecs
 import numpy as np
 
 
@@ -83,7 +84,7 @@ class QuestionLoader(object):
         """
         categories = {}
         parentdic = {}
-        with open(self.catfile, 'rU') as f:
+        with open(self.catfile, 'rU', encoding='utf8') as f:
             reader = csv.reader(f, quotechar='"', delimiter=',')
             f_header = next(reader)
 
@@ -134,7 +135,7 @@ class QuestionLoader(object):
             stored.
 
         """
-        with open(self.qfile, 'rU') as f:
+        with open(self.qfile, 'rU', encoding='utf8') as f:
             reader = csv.reader(f, quotechar='"', delimiter=',')
             f_header = next(reader)
 
