@@ -404,7 +404,7 @@ class SMSGuruModel:
         return self.model.fit_transform(self.question_loader_.questions,
                                         self.question_loader_.categoryids)
 
-    def gridsearch(self, param_grid, verbose=10, CV=5, n_jobs=1):
+    def gridsearch(self, param_grid, verbose=100, CV=5, n_jobs=1):
         """
         Perform a gridsearch
 
