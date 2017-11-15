@@ -404,7 +404,7 @@ class SMSGuruModel:
         return self.model.fit_transform(self.question_loader_.questions,
                                         self.question_loader_.categoryids)
 
-    def gridsearch(self, param_grid, verbose=10, CV=5, n_jobs=1):
+    def gridsearch(self, param_grid, verbose=100, CV=5, n_jobs=1):
         """
         Perform a gridsearch
 
@@ -441,6 +441,7 @@ class SMSGuruModel:
                                          return_train_score=True,
                                          scoring=SCORES,
                                          refit=False,
+					 error_score=-1,
                                          n_jobs=self.n_jobs_,
                                          verbose=verbose)
 
@@ -460,7 +461,7 @@ if __name__ == "__main__":
     subcats = False
     metadata = False
     # the dimensions used in the dim reduction step
-    N_DIM_OPTIONS = [10, 30, 60, 100, 200, 500, 1000, 1500, 2500, 5000]
+    N_DIM_OPTIONS = [10, 50, 100, 200, 500, 1000, 1500, 2500, 5000]
 
     # this choice is based on [Seb99]
     MIN_DF = [1, 2, 3]
@@ -509,7 +510,7 @@ if __name__ == "__main__":
 
     sms_guru_model = (SMSGuruModel(classifier=classifier, metadata=metadata).
                       set_question_loader(subcats=subcats).
-                      gridsearch(param_grid=test_param_grid, n_jobs=-1))
+                      gridsearch(param_grid=grid, n_jobs=-1))
     current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     np.save('./results/gridsearch/' + current_time + 'grids_cv.npy',
             sms_guru_model.grid_search_.cv_results_)

@@ -1,0 +1,6 @@
+performed at: 2017-11-14_13:27:05, non_grid_params:  subcats: True,
+                      metadata: False, CV: 3, classifier: MultinomialNB
+performed at: 2017-11-14_15:50:26, non_grid_params:  subcats: False,
+                      metadata: True, CV: 3, classifier: MultinomialNB
+performed at: 2017-11-14_15:51:10, non_grid_params:  subcats: True,
+                      metadata: True, CV: 3, classifier: MultinomialNB
