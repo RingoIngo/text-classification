@@ -4,3 +4,15 @@ performed at: 2017-11-14_15:50:26, non_grid_params:  subcats: False,
                       metadata: True, CV: 3, classifier: MultinomialNB
 performed at: 2017-11-14_15:51:10, non_grid_params:  subcats: True,
                       metadata: True, CV: 3, classifier: MultinomialNB
+performed at: 2017-11-15_15:29:18, non_grid_params:  subcats: False,
+                      metadata: False, CV: 3, classifier: MultinomialNB
+performed at: 2017-11-15_18:02:32, non_grid_params:  subcats: True,
+                      metadata: False, CV: 2, classifier: MultinomialNB
+performed at: 2017-11-16_07:21:39, non_grid_params:  subcats: True,
+                      metadata: False, CV: 3, classifier: MultinomialNB
+performed at: 2017-11-16_08:11:23, non_grid_params:  subcats: True,
+                      metadata: True, CV: 3, classifier: MultinomialNB
+performed at: 2017-11-16_08:29:39, non_grid_params:  subcats: False,
+                      metadata: False, CV: 3, classifier: MultinomialNB
+performed at: 2017-11-16_13:58:32, non_grid_params:  subcats: False,
+                      metadata: True, CV: 3, classifier: MultinomialNB
