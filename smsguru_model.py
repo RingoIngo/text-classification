@@ -504,7 +504,7 @@ if __name__ == "__main__":
              union__question_bow__vectorize__min_df=[1, 2],
              union__question_bow__tfidf=[None],
              union__question_bow__reduce_dim=[SelectKBest(chi2)],
-             union__question_bow__reduce_dim__k=[2000],
+             union__question_bow__reduce_dim__k=[30],
              ),
     ]
 
