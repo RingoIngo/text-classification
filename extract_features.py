@@ -6,8 +6,7 @@ The :mod:`extract_features` module implements the function
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectKBest, chi2
 import numpy as np
-import plac
-import pdb
+import argparse
 
 from smsguru_model import SMSGuruModel
 
@@ -38,19 +37,15 @@ def extract_features(qfile='question_train.csv',
                      metadata=False,
                      reduce_dim='chi2',
                      spellcorrect=False,
-                     stem='True',
-                     subcats='True',
+                     stem=True,
+                     subcats=True,
                      tfidf=False,
-                     min_df=1,
+                     min_df=2,
                      tokenizer='word_punct_tokenizer',
                      outfile='features.npz',
                      verbose=False):
     """Extract features from files with questions and categories
     """
-    # TODO: add doc when function finished
-    # this cumbersome construction is due to plac annotations
-    stem = True if stem == 'True' else False
-    subcats = True if subcats == 'True' else False
     sms_guru_model = SMSGuruModel(classifier=None, metadata=metadata)
     sms_guru_model.set_question_loader(qfile=qfile, catfile=catfile,
                                        subcats=subcats, verbose=verbose)
@@ -103,6 +98,4 @@ def extract_features(qfile='question_train.csv',
 # run extract_features method if module is executed as a script
 # put non-default input here in function
 if __name__ == "__main__":
-    # extract_features(tokenizer='word_tokenizer',
-    #                  tfidf=True, mapnumbers=True, min_df=2)
-    plac.call(extract_features)
+    
