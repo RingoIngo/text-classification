@@ -24,12 +24,12 @@ class QuestionLoader(object):
     Parameters
     ----------
     qfile : csv file containing the questions and the
-        corresponding categories. By defailt the file
+        corresponding categories. By default the file
         'question_train.csv' is loaded.
 
     catfile : csv file containing the categoires of the questions.
-        A category has a category_nam (string), a category_id (int)
-        and a parent_id (int). If the parent_id eqauals zero the
+        a category has a category_nam (string), a category_id (int)
+        and a parent_id (int). if the parent_id eqauals zero the
         category has no parent.
 
     metadata : boolean, determines if also the creation date of the sample

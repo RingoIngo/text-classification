@@ -307,7 +307,7 @@ class SMSGuruModel:
                        transformer_list[0][1].named_steps['reduce_dim'],
                        TruncatedSVD)):
             # no interpretable features names
-            featurenames = None
+            return None
         else:
             featurenames = (self.model.named_steps['union'].
                             transformer_list[0][1].named_steps['vectorize'].
