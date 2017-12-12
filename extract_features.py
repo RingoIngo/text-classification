@@ -123,17 +123,17 @@ def extract_features(qfile='question_train.csv',
                                        subcats=subcats, verbose=verbose)
     # tokens is the name of the first transformation in the pipeline
     sms_guru_model.model.set_params(
-        union__question_bow__tokens__mapdates=mapdates,
-        union__question_bow__tokens__mapnumbers=mapnumbers,
-        union__question_bow__tokens__spellcorrect=spellcorrect,
-        union__question_bow__tokens__stem=stem,
-        union__question_bow__tokens__tokenizer=tokenizer,
-        union__question_bow__vectorize__binary=binary,
-        union__question_bow__vectorize__min_df=min_df,
+        union__bow__tokens__mapdates=mapdates,
+        union__bow__tokens__mapnumbers=mapnumbers,
+        union__bow__tokens__spellcorrect=spellcorrect,
+        union__bow__tokens__stem=stem,
+        union__bow__tokens__tokenizer=tokenizer,
+        union__bow__vectorize__binary=binary,
+        union__bow__vectorize__min_df=min_df,
     )
     # term frequency weighting
     if not tfidf:
-        sms_guru_model.model.set_params(union__question_bow__tfidf=None)
+        sms_guru_model.model.set_params(union__bow__tfidf=None)
 
     # dimension reduction
     if reduce_dim == 'None':

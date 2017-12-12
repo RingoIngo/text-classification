@@ -193,8 +193,6 @@ class NamedPipeline(Pipeline):
         for name, transformer in reversed(self.steps):
             if (transformer is not None and
                     hasattr(transformer, 'get_feature_names')):
-                print(name)
-                # print(transformer.get_feature_names())
                 return transformer.get_feature_names()
         return None
 
@@ -279,7 +277,7 @@ class SMSGuruModel:
                 transformer_list=[
 
                     # Pipeline for pulling features from the question itself
-                    ('question_bow', NamedPipeline([
+                    ('bow', NamedPipeline([
                         ('selector', ItemSelector(key='question')),
                         ('tokens', ttc.TextTokenizerAndCleaner()),
                         ('vectorize', CountVectorizer(tokenizer=_identity,
@@ -478,27 +476,27 @@ if __name__ == "__main__":
     MIN_DF = [1, 2, 3]
 
     base_grid = (
-        dict(union__question_bow__tokens__mapdates=[True, False],
-             union__question_bow__tokens__mapnumbers=[True, False],
-             union__question_bow__tokens__spellcorrect=[True, False],
-             union__question_bow__tokens__stem=[True, False],
-             # union__question_bow__tokens__tokenizer=['word_tokenizer',
+        dict(union__bow__tokens__mapdates=[True, False],
+             union__bow__tokens__mapnumbers=[True, False],
+             union__bow__tokens__spellcorrect=[True, False],
+             union__bow__tokens__stem=[True, False],
+             # union__bow__tokens__tokenizer=['word_tokenizer',
              #                                         'word_punct_tokenizer'],
-             union__question_bow__tokens__tokenizer=['word_punct_tokenizer'],
-             # union__question_bow__vectorize__binary=[True, False],
-             union__question_bow__vectorize__min_df=MIN_DF,
-             union__question_bow__tfidf=[None, TfidfTransformer()],
+             union__bow__tokens__tokenizer=['word_punct_tokenizer'],
+             # union__bow__vectorize__binary=[True, False],
+             union__bow__vectorize__min_df=MIN_DF,
+             union__bow__tfidf=[None, TfidfTransformer()],
              )
     )
 
     univariate = (
-        dict(union__question_bow__reduce_dim=[SelectKBest(chi2)],
-             union__question_bow__reduce_dim__k=N_DIM_OPTIONS)
+        dict(union__bow__reduce_dim=[SelectKBest(chi2)],
+             union__bow__reduce_dim__k=N_DIM_OPTIONS)
     )
 
     multivariate = (
-        dict(union__question_bow__reduce_dim=[TruncatedSVD()],
-             union__question_bow__reduce_dim__n_components=N_DIM_OPTIONS)
+        dict(union__bow__reduce_dim=[TruncatedSVD()],
+             union__bow__reduce_dim__n_components=N_DIM_OPTIONS)
     )
 
     grid = [merge_two_dicts(base_grid, univariate),
@@ -506,16 +504,16 @@ if __name__ == "__main__":
 
     # TEST
     test_param_grid = [
-        dict(union__question_bow__tokens__mapdates=[False],
-             union__question_bow__tokens__mapnumbers=[False],
-             union__question_bow__tokens__spellcorrect=[False],
-             union__question_bow__tokens__stem=[False],
-             union__question_bow__tokens__tokenizer=['word_punct_tokenizer'],
-             union__question_bow__vectorize__binary=[False],
-             union__question_bow__vectorize__min_df=[1, 2],
-             union__question_bow__tfidf=[None],
-             union__question_bow__reduce_dim=[SelectKBest(chi2)],
-             union__question_bow__reduce_dim__k=[30],
+        dict(union__bow__tokens__mapdates=[False],
+             union__bow__tokens__mapnumbers=[False],
+             union__bow__tokens__spellcorrect=[False],
+             union__bow__tokens__stem=[False],
+             union__bow__tokens__tokenizer=['word_punct_tokenizer'],
+             union__bow__vectorize__binary=[False],
+             union__bow__vectorize__min_df=[1, 2],
+             union__bow__tfidf=[None],
+             union__bow__reduce_dim=[SelectKBest(chi2)],
+             union__bow__reduce_dim__k=[30],
              ),
     ]
 
