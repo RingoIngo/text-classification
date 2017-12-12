@@ -22,7 +22,7 @@ import text_tokenizer_and_cleaner as ttc
 import question_loader as ql
 
 
-class QuestionCretionDateExtractor(BaseEstimator, TransformerMixin):
+class QuestionCreationDateExtractor(BaseEstimator, TransformerMixin):
     """Extract the question & date.
 
     Takes a list of tuples (question, creation_date) and produces a dict of
@@ -172,6 +172,33 @@ def _identity(words):
 SCORES = ['recall_macro', 'precision_macro', 'f1_macro', 'f1_micro']
 
 
+class NamedPipeline(Pipeline):
+    """Extend `Pipleline` class with a `get_feature_names` method
+
+    """
+
+    def get_feature_names(self):
+        """Return the feature names
+
+        Traverse the chained transformers from the end and check
+        `get_feature_names` method is implemented. If so, return
+        feature names.
+
+        Returns
+        ---------
+        featurenames : a list, containing the feature names as strings,
+                or None, if no transformer implements the
+                `get_feature_names` method
+        """
+        for name, transformer in reversed(self.steps):
+            if (transformer is not None and
+                    hasattr(transformer, 'get_feature_names')):
+                print(name)
+                # print(transformer.get_feature_names())
+                return transformer.get_feature_names()
+        return None
+
+
 class SMSGuruModel:
     """Contains all the steps from file reading to the model
 
@@ -185,10 +212,10 @@ class SMSGuruModel:
             1.1.1. tokenize and clean text
             1.1.2. vectorize tokens
             1.1.3. tfidf weighting
-            1.1.4. TruncatedSVD reduction
         1.2 select creation dates
             1.2.1. vectorize
-    2. classifier (optional)
+    2. dimension reduction
+    3. classifier (optional)
 
     See the __main__ for an example how the class can be used.
 
@@ -245,25 +272,24 @@ class SMSGuruModel:
         """build the model"""
         steps = [
             # Extract the question & its creation time
-            ('question_created_at', QuestionCretionDateExtractor()),
+            ('question_created_at', QuestionCreationDateExtractor()),
 
             # Use FeatureUnion to combine the features from question and time
             ('union', FeatureUnion(
                 transformer_list=[
 
                     # Pipeline for pulling features from the question itself
-                    ('question_bow', Pipeline([
+                    ('question_bow', NamedPipeline([
                         ('selector', ItemSelector(key='question')),
                         ('tokens', ttc.TextTokenizerAndCleaner()),
                         ('vectorize', CountVectorizer(tokenizer=_identity,
                                                       preprocessor=None,
                                                       lowercase=False)),
                         ('tfidf', TfidfTransformer()),
-                        ('reduce_dim', SelectKBest(chi2, k=500)),
                     ])),
 
                     # Pipeline for creation time
-                    ('creation_time', Pipeline([
+                    ('creation_time', NamedPipeline([
                         ('selector', ItemSelector(key='created_at')),
                         ('vectorize', CreationDateVectorizer()),
                     ])),
@@ -272,6 +298,7 @@ class SMSGuruModel:
                 # weight components in FeatureUnion
                 transformer_weights=None,
             )),
+            ('reduce_dim', SelectKBest(chi2, k=500)),
         ]
 
         if classifier is not None:
@@ -289,11 +316,10 @@ class SMSGuruModel:
         """Return the feature names if interpretable
 
         In case none or the univariate feature selection method is used
-        the names of the words whose counts (or transformed counts,
-        e.g.tfidf) represent the features are returned.
-        If `metadate` is True the `get_feature_mames()` method of the class
-        CreationDateVectorizer is used and its output appended to the list
-        of feature names.'
+        the names of the selected features prefixed by the feature type
+        (i.e. bow or creation_time) are returned. The feature names of the
+        features in bow are the words whose counts (or transformed counts,
+        e.g.tfidf) represent the features.
 
         Returns
         ---------
@@ -303,30 +329,15 @@ class SMSGuruModel:
             print("invoke fit_transform first!")
             return
 
-        if (isinstance(self.model.named_steps['union'].
-                       transformer_list[0][1].named_steps['reduce_dim'],
-                       TruncatedSVD)):
+        if (isinstance(self.model.named_steps['reduce_dim'], TruncatedSVD)):
             # no interpretable features names
             return None
         else:
-            featurenames = (self.model.named_steps['union'].
-                            transformer_list[0][1].named_steps['vectorize'].
-                            get_feature_names())
+            featurenames = self.model.named_steps['union'].get_feature_names()
 
-        if (isinstance(self.model.named_steps['union'].
-                       transformer_list[0][1].named_steps['reduce_dim'],
-                       SelectKBest)):
-            feature_mask = (self.model.named_steps['union'].
-                            transformer_list[0][1].named_steps['reduce_dim'].
-                            get_support())
+        if (isinstance(self.model.named_steps['reduce_dim'], SelectKBest)):
+            feature_mask = (self.model.named_steps['reduce_dim'].get_support())
             featurenames = list(compress(featurenames, feature_mask))
-
-        if ((self.model.named_steps['union'].transformer_list[1][1]
-                is not None) and featurenames is not None):
-            metadata_label = (self.model.named_steps['union'].
-                              transformer_list[1][1].named_steps['vectorize'].
-                              get_feature_names())
-            featurenames = featurenames + metadata_label
 
         return np.asarray(featurenames)
 
@@ -441,7 +452,7 @@ class SMSGuruModel:
                                          return_train_score=True,
                                          scoring=SCORES,
                                          refit=False,
-					 error_score=-1,
+                                         error_score=-1,
                                          n_jobs=self.n_jobs_,
                                          verbose=verbose)
 

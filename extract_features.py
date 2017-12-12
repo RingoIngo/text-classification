@@ -137,13 +137,13 @@ def extract_features(qfile='question_train.csv',
 
     # dimension reduction
     if reduce_dim == 'None':
-        sms_guru_model.model.set_params(union__question_bow__reduce_dim=None)
+        sms_guru_model.model.set_params(reduce_dim=None)
     elif reduce_dim == 'trunSVD':
         sms_guru_model.model.set_params(
-            union__question_bow__reduce_dim=TruncatedSVD(n_components=dim))
+            reduce_dim=TruncatedSVD(n_components=dim))
     elif reduce_dim == 'chi2':
         sms_guru_model.model.set_params(
-            union__question_bow__reduce_dim=SelectKBest(chi2, k=dim))
+            reduce_dim=SelectKBest(chi2, k=dim))
 
     features = sms_guru_model.fit_transform()
     featurenames = sms_guru_model.get_feature_names()
