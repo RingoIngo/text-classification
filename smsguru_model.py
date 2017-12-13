@@ -13,10 +13,11 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import FeatureUnion
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.pipeline import Pipeline
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.feature_selection import SelectKBest, chi2
 # from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import roc_auc_score, make_scorer
 
 import text_tokenizer_and_cleaner as ttc
 import question_loader as ql
@@ -167,11 +168,6 @@ def _identity(words):
     return words
 
 
-# for multiclass it holds:
-# recall_micro = precision_micro = f1_micro = accuracy
-SCORES = ['recall_macro', 'precision_macro', 'f1_macro', 'f1_micro']
-
-
 class NamedPipeline(Pipeline):
     """Extend `Pipleline` class with a `get_feature_names` method
 
@@ -195,6 +191,68 @@ class NamedPipeline(Pipeline):
                     hasattr(transformer, 'get_feature_names')):
                 return transformer.get_feature_names()
         return None
+
+
+def nested_cv(estimator, param_grid, cv, X, y, scoring):
+    """
+    Perform a nested gridsearch to evaluate an estimator with param_grid
+
+    In contrast to a non-nested gridsearch this method does NOT find
+    the best parameter combination from the grid, but gives an estimate
+    of the generalization error of an estimator with associated grid.
+    The output can be used to compare different estimators
+    (e.g. SVM vs. kNN) without taking a specific optimized hyper paramter
+    combination into account, but the whole range of possible parameters
+    specified in the grid. See e.g.
+    `http://scikit-learn.org/stable/auto_examples/model_selection/
+    plot_nested_cross_validation_iris.html`
+
+    Parameters
+    ----------
+    estimator : estimator which is evaluated
+
+    param_grid : dictionary of parameters of which the best one from the
+        the inner cv is used to give a score in the outer cv.
+        See the sklearn Pipeline documentation on how
+        parameters need to be specified.
+
+    cv : number of folds for crossvalitdation in inner and in outer cv
+
+    X : feature matrix
+
+    y : labels
+
+    scoring: scoring function
+
+    Returns
+    ---------
+    nested_scores : an array of shape=(cv,) which contains the scores
+        of the validations in the outer cv
+    """
+    clf = GridSearchCV(estimator=estimator, param_grid=param_grid, cv=cv,
+                       n_jobs=-1, scoring=scoring, verbose=100)
+    return cross_val_score(clf, X=X, y=y, cv=cv, scoring=scoring, verbose=100)
+
+
+# for multiclass it holds:
+# recall_micro = precision_micro = f1_micro = accuracy
+# SCORES = ['recall_macro', 'precision_macro', 'f1_macro', 'f1_micro']
+def roc_auc(y_true, y_score):
+    """Wrapper function for roc_auc_score with average=None"""
+    return roc_auc_score(y_true, y_score, average=None)
+
+
+def roc_auc_micro(y_true, y_score):
+    """Wrapper function for roc_auc_score with average='micro'"""
+    return roc_auc_score(y_true, y_score, average='micro')
+
+
+SCORES = {'recall_macro': 'recall_macro',
+          'precision_macro': 'precision_macro',
+          'f1_macro': 'f1_macro',
+          'f1micro': 'f1micro',
+          'roc_auc_micro': make_scorer(roc_auc_micro),
+          'roc_auc': make_scorer(roc_auc)}
 
 
 class SMSGuruModel:
@@ -260,13 +318,22 @@ class SMSGuruModel:
 
     """
 
-    def __init__(self, classifier=MultinomialNB(), metadata=True):
+    def __init__(self, classifier=MultinomialNB(),
+                 reduction=SelectKBest(chi2, k=500),
+                 metadata=True):
         self.classifier = classifier
+        self.reduction = reduction
         self.metadata = metadata
-        self.model = self._build(self.classifier, self.metadata)
+        self.model = self._build(self.classifier,
+                                 self.reduction,
+                                 self.metadata)
         self.is_fitted = False
+        self.CV_ = None
+        self.n_jobs_ = None
+        self.grid_search_ = None
+        self.param_grid_ = None
 
-    def _build(self, classifier, metadata):
+    def _build(self, classifier, reduction, metadata):
         """build the model"""
         steps = [
             # Extract the question & its creation time
@@ -281,9 +348,10 @@ class SMSGuruModel:
                         ('selector', ItemSelector(key='question')),
                         ('tokens', ttc.TextTokenizerAndCleaner()),
                         ('vectorize', CountVectorizer(tokenizer=_identity,
+                                                      mind_df=2,
                                                       preprocessor=None,
                                                       lowercase=False)),
-                        ('tfidf', TfidfTransformer()),
+                        ('tfidf', None),
                     ])),
 
                     # Pipeline for creation time
@@ -296,7 +364,7 @@ class SMSGuruModel:
                 # weight components in FeatureUnion
                 transformer_weights=None,
             )),
-            ('reduce_dim', SelectKBest(chi2, k=500)),
+            ('reduce_dim', reduction),
         ]
 
         if classifier is not None:
@@ -327,13 +395,13 @@ class SMSGuruModel:
             print("invoke fit_transform first!")
             return
 
-        if (isinstance(self.model.named_steps['reduce_dim'], TruncatedSVD)):
+        if isinstance(self.model.named_steps['reduce_dim'], TruncatedSVD):
             # no interpretable features names
             return None
         else:
             featurenames = self.model.named_steps['union'].get_feature_names()
 
-        if (isinstance(self.model.named_steps['reduce_dim'], SelectKBest)):
+        if isinstance(self.model.named_steps['reduce_dim'], SelectKBest):
             feature_mask = (self.model.named_steps['reduce_dim'].get_support())
             featurenames = list(compress(featurenames, feature_mask))
 
@@ -441,7 +509,6 @@ class SMSGuruModel:
             print("model has already been fitted")
 
         self.CV_ = CV
-        # TODO: n_jobs could be an interesting option when on cluster
         self.n_jobs_ = n_jobs
         self.param_grid_ = param_grid
 
@@ -457,6 +524,46 @@ class SMSGuruModel:
         self.grid_search_.fit(self.question_loader_.questions,
                               self.question_loader_.categoryids)
         return self
+
+    def nested_cv(self, param_grid, CV=5):
+        """
+        Perform a nested gridsearch to evaluate an estimator with param grid
+
+        In contrast to a non-nested gridsearch this method does NOT find
+        the best parameter combination from the grid, but gives an estimate
+        of the generalization error of an estimator with associated grid.
+        The output can be used to compare different estimators
+        (e.g. SVM vs. kNN) without taking a specific optimized hyper paramter
+        combination into account, but the whole range of possible parameters
+        specified in the grid. See e.g.
+        `http://scikit-learn.org/stable/auto_examples/model_selection/
+        plot_nested_cross_validation_iris.html`
+
+        Parameters
+        ----------
+        param_grid : dictionary of parameters of which the best one from the
+            the inner cv is used to give a score in the outer cv.
+            See the sklearn Pipeline documentation on how
+            parameters need to be specified.
+
+        cv : number of folds for crossvalitdation in inner and outer cv
+
+
+        Returns
+        ---------
+        nested_scores : an array of shape=(CV,) which contains the scores
+            of the validations in the outer cv
+        """
+        if not hasattr(self, 'question_loader_'):
+            print("Set question loader first!")
+            return
+
+        return nested_cv(estimator=self.model,
+                         param_grid=param_grid,
+                         cv=CV,
+                         X=self.question_loader_.questions,
+                         y=self.question_loader_.categoryids,
+                         scoring='f1_micro')
 
 
 if __name__ == "__main__":

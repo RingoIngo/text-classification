@@ -25,36 +25,36 @@ if __name__ == "__main__":
     MIN_DF = [1, 2, 3]
 
     base_grid = (
-        dict(union__question_bow__tokens__spellcorrect=[True, False],
-             union__question_bow__tokens__stem=[True, False],
-             # union__question_bow__tokens__tokenizer=['word_tokenizer',
+        dict(union__bow__tokens__spellcorrect=[True, False],
+             union__bow__tokens__stem=[True, False],
+             # union__bow__tokens__tokenizer=['word_tokenizer',
              #                                         'word_punct_tokenizer'],
-             union__question_bow__tokens__tokenizer=['word_punct_tokenizer'],
-             # union__question_bow__vectorize__binary=[True, False],
-             union__question_bow__vectorize__min_df=MIN_DF,
-             union__question_bow__tfidf=[None, TfidfTransformer()],
+             union__bow__tokens__tokenizer=['word_punct_tokenizer'],
+             # union__bow__vectorize__binary=[True, False],
+             union__bow__vectorize__min_df=MIN_DF,
+             union__bow__tfidf=[None, TfidfTransformer()],
              )
     )
 
     mapnumerics = (
-        dict(union__question_bow__tokens__mapdates=[True],
-             union__question_bow__tokens__mapnumbers=[True])
+        dict(union__bow__tokens__mapdates=[True],
+             union__bow__tokens__mapnumbers=[True])
     )
 
 
     no_mapnumerics = (
-        dict(union__question_bow__tokens__mapdates=[False],
-             union__question_bow__tokens__mapnumbers=[False])
+        dict(union__bow__tokens__mapdates=[False],
+             union__bow__tokens__mapnumbers=[False])
     )
 
     univariate = (
-        dict(union__question_bow__reduce_dim=[SelectKBest(chi2)],
-             union__question_bow__reduce_dim__k=N_DIM_OPTIONS)
+        dict(union__bow__reduce_dim=[SelectKBest(chi2)],
+             union__bow__reduce_dim__k=N_DIM_OPTIONS)
     )
 
     multivariate = (
-        dict(union__question_bow__reduce_dim=[TruncatedSVD()],
-             union__question_bow__reduce_dim__n_components=N_DIM_OPTIONS)
+        dict(union__bow__reduce_dim=[TruncatedSVD()],
+             union__bow__reduce_dim__n_components=N_DIM_OPTIONS)
     )
 
     grid = [reduce(merge_two_dicts, [base_grid, mapnumerics, univariate]),
@@ -62,16 +62,16 @@ if __name__ == "__main__":
 
     # TEST
     test_param_grid = [
-        dict(union__question_bow__tokens__mapdates=[True],
-             union__question_bow__tokens__mapnumbers=[True],
-             union__question_bow__tokens__spellcorrect=[False],
-             union__question_bow__tokens__stem=[False],
-             union__question_bow__tokens__tokenizer=['word_punct_tokenizer'],
-             union__question_bow__vectorize__binary=[False],
-             union__question_bow__vectorize__min_df=[3],
-             union__question_bow__tfidf=[None],
-             union__question_bow__reduce_dim=[SelectKBest(chi2)],
-             union__question_bow__reduce_dim__k=[8000],
+        dict(union__bow__tokens__mapdates=[True],
+             union__bow__tokens__mapnumbers=[True],
+             union__bow__tokens__spellcorrect=[False],
+             union__bow__tokens__stem=[False],
+             union__bow__tokens__tokenizer=['word_punct_tokenizer'],
+             union__bow__vectorize__binary=[False],
+             union__bow__vectorize__min_df=[3],
+             union__bow__tfidf=[None],
+             union__bow__reduce_dim=[SelectKBest(chi2)],
+             union__bow__reduce_dim__k=[8000],
              ),
     ]
 
