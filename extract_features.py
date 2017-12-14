@@ -216,4 +216,12 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose', action='store_true',
                         default=argparse.SUPPRESS)
 
-    extract_features(**vars(parser.parse_args()))
+    try:
+        extract_features(**vars(parser.parse_args()))
+    except ValueError:
+        print("""Invalid option combination! Note that univariate feature
+              reduction uses the chi2 method which expects non-negative
+              features. Since the creation hour which is used in metadata is
+              modeled as a 2dim cyclic feature it also contains negative
+              values. So the metadata option can not be used together with
+              univariate feature selection.""")

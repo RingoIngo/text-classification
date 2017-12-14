@@ -354,7 +354,7 @@ class SMSGuruModel:
                         ('selector', ItemSelector(key='question')),
                         ('tokens', ttc.TextTokenizerAndCleaner()),
                         ('vectorize', CountVectorizer(tokenizer=_identity,
-                                                      mind_df=2,
+                                                      min_df=2,
                                                       preprocessor=None,
                                                       lowercase=False)),
                         ('tfidf', None),

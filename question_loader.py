@@ -8,7 +8,6 @@ import csv
 import pprint
 from datetime import datetime
 import operator
-import codecs
 import numpy as np
 
 
@@ -66,7 +65,10 @@ class QuestionLoader(object):
                   have a valid date format in the `created_at` section.
                   This also means that the resulting classifier can only be
                   used on samples with valid date format. In case of the
-                  default sample data this is a reduction of 36 samples.""")
+                  default sample data this is a reduction of 36 samples.\n
+                  This feature can not be used with a classifier or
+                  feature extraction method that excpects
+                  positive feature values!""")
 
     def _read_category_file(self, verbose):
         """read categoriy_id, parent_id and category_name from file
