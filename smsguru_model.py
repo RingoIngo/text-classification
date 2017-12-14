@@ -155,13 +155,19 @@ class CreationDateVectorizer(BaseEstimator, TransformerMixin):
                   If this feature is used in the model, the QuestionLoader
                   should get metadate=True""")
 
-        # this is the from scikit expected format
         time_vector = np.asarray(time_list).reshape(len(time_list), 1)
-        return time_vector
+
+        # apply a cyclic transformation so that 0 and 23 are close
+        # see https://ianlondon.github.io/blog/
+        # encoding-cyclical-features-24hour-time/
+        cyclic_feature = np.concatenate((np.sin(2*np.pi*time_vector/24),
+                                         np.cos(2*np.pi*time_vector/24)),
+                                        axis=1)
+        return cyclic_feature
 
     def get_feature_names(self):
-        """Return the name of the feature: `CREATION_HOUR`"""
-        return ['CREATION_HOUR']
+        """Return the name of the cyclic feature components"""
+        return ['CREATION_HOUR_SIN', 'CREATION_HOUR_COS']
 
 
 def _identity(words):
