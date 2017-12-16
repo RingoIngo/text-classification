@@ -16,3 +16,6 @@ performed at: 2017-11-16_08:29:39, non_grid_params:  subcats: False,
                       metadata: False, CV: 3, classifier: MultinomialNB
 performed at: 2017-11-16_13:58:32, non_grid_params:  subcats: False,
                       metadata: True, CV: 3, classifier: MultinomialNB
+
+Every combination has two files. The earlier one is the one with mapnumerics=True,
+The second one the one with mapnumerics=False

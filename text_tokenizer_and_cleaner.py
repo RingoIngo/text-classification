@@ -26,9 +26,10 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
     Tokenizes and cleans text. Cleaning may consist of
     spell correction, a mapping of dates, times and other
     numeric data, removing of stopwords, converting to
-    lower case and stemming.
+    lower case and stemming. Default values are justified
+    by the evaluation in milestone 1 (see report and presentation).
 
-    Because fof its interfaces the class can be used in
+    Because of its interfaces the class can be used in
     a `Pipeline`
 
     Parameters
@@ -54,9 +55,10 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
         `word_punct_tokenizer`. If `word_tokenizer`
         TreebankWordTokenizer from nltk package is used.
         This is the from nltk adviced tokenizer
-        (see: http://www.nltk.org/api/nltk.tokenize.html) and thus default.
+        (see: http://www.nltk.org/api/nltk.tokenize.html).
         If `word_punct_tokenizer` the `WordPunctTokenizer` from nltk
-        package is used. If any other string is given the default
+        package is used, which is also the defualt value.
+        If any other string is given the default
         value is applied.
     """
 
@@ -70,7 +72,7 @@ class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
                      "%Y"]
 
     def __init__(self, mapdates=True, mapnumbers=False, spellcorrect=False,
-                 stem=True, tokenizer='word_tokenizer'):
+                 stem=True, tokenizer='word_punct_tokenizer'):
         self.spellcorrect = spellcorrect
         self.stem = stem
         self.tokenizer = tokenizer

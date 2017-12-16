@@ -1,3 +1,5 @@
 __pycache__
 **.npz
+**.eps
+**.ipynb
 ./results/gridsearch/gridsearches.txt

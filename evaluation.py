@@ -9,10 +9,14 @@ import numpy as np
 
 
 # number of folds used in cross-validation
-CV = 3
+CV = 10
 
 # in milestone it suffices to focus on parent categories
-subcats = False
+SUBCATS = False
+
+# number of jobs used in CV -> parallelize
+N_JOBS = -1
+N_PARENTCATS = 14
 
 
 def merge_two_dicts(x, y):
@@ -22,13 +26,13 @@ def merge_two_dicts(x, y):
     return z
 
 
-def save_and_report(results, folder, report=None):
+def save_and_report(results, folder, name='grids_cv.npy', report=None):
     """Save results and info about the performed search"""
 
     # save results
     current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     path = './results/gridsearch/' + folder + '/'
-    filename = current_time + 'grids_cv.npy'
+    filename = current_time + name
     np.save(path + filename, results)
 
     if report is not None:

@@ -219,7 +219,7 @@ if __name__ == "__main__":
     try:
         extract_features(**vars(parser.parse_args()))
     except ValueError:
-        print("""Invalid option combination! Note that univariate feature
+        print("""Invalid option combination!\n Note that univariate feature
               reduction uses the chi2 method which expects non-negative
               features. Since the creation hour which is used in metadata is
               modeled as a 2dim cyclic feature it also contains negative
