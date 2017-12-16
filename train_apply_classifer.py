@@ -8,10 +8,10 @@ import evaluation
 
 
 def train_apply_classifer(classifier='lda_svm',
-                          qfile_train='question_train.csv',
-                          qcatfile_train='question_category_train.csv',
-                          catfile='category.csv',
-                          qfile_test='question_test.csv',
+                          qfile_train='/data/question_train.csv',
+                          qcatfile_train='/data/question_category_train.csv',
+                          catfile='/data/category.csv',
+                          qfile_test='/data/question_test.csv',
                           subcats=False,
                           CV=10,
                           verbose=100):

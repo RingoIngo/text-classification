@@ -9,12 +9,12 @@ import numpy as np
 from sklearn.decomposition import TruncatedSVD
 from sklearn.feature_selection import SelectKBest, chi2
 
-from smsguru_model import SMSGuruModel
+from model import SMSGuruModel
 
 
-def extract_features(qfile='question_train.csv',
-                     qcatfile='question_category_train.csv',
-                     catfile='category.csv',
+def extract_features(qfile='./data/question_train.csv',
+                     qcatfile='./data/question_category_train.csv',
+                     catfile='./data/category.csv',
                      binary=False,
                      dim=500,
                      mapdates=True,

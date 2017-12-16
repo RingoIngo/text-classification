@@ -19,8 +19,8 @@ from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import roc_auc_score, make_scorer
 
-import text_tokenizer_and_cleaner as ttc
-import question_loader as ql
+import model.text.text_tokenizer_and_cleaner as ttc
+import model.question_loader as ql
 
 
 class QuestionCreationDateExtractor(BaseEstimator, TransformerMixin):

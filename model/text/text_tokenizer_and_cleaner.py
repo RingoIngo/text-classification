@@ -17,7 +17,7 @@ from nltk.stem import SnowballStemmer
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from correctors import SpellingCorrector
+from model.text.correctors import SpellingCorrector
 
 
 class TextTokenizerAndCleaner(BaseEstimator, TransformerMixin):
