@@ -12,13 +12,13 @@ import evaluation.shared as shared
 import model
 
 
-MODEL = model.SMSGuruModel(classifier=SVC(), reduction=LDA())
+MODEL = model.SMSGuruModel(classifier=SVC(), reduction=LDA(), memory=True)
 
 # grid
 N_COMPONENTS_RANGE = np.arange(1, shared.N_PARENTCATS + 1)
 # kernels = ['linear', 'rbf']
-GAMMA_RANGE = np.logspace(-3, 3, 10)
-C_RANGE = np.logspace(-3, 3, 10)
+GAMMA_RANGE = np.logspace(-3, 3, 7)
+C_RANGE = np.logspace(-3, 3, 7)
 
 
 def make_grid(dim=False):
@@ -43,8 +43,8 @@ def evaluate():
         results=MODEL.grid_search_.cv_results_,
         folder='lda_svm')
 
-    since in this case the higher the dimension the better the estimator
-    we do not include the lower dimensions in this search
+    # since in this case the higher the dimension the better the estimator
+    # we do not include the lower dimensions in this search
     grid_generalization_error = make_grid()
     nested_scores = MODEL.nested_cv(
         param_grid=grid_generalization_error, CV=shared.CV)

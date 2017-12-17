@@ -9,7 +9,7 @@ import numpy as np
 
 
 # number of folds used in cross-validation
-CV = 10
+CV = 5
 
 # in milestone it suffices to focus on parent categories
 SUBCATS = False

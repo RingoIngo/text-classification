@@ -326,20 +326,22 @@ class SMSGuruModel:
 
     def __init__(self, classifier=MultinomialNB(),
                  reduction=SelectKBest(chi2, k=500),
-                 metadata=True):
+                 metadata=True, memory=False):
         self.classifier = classifier
         self.reduction = reduction
         self.metadata = metadata
+        self.memory = memory
         self.model = self._build(self.classifier,
                                  self.reduction,
-                                 self.metadata)
+                                 self.metadata,
+                                 self.memory)
         self.is_fitted = False
         self.CV_ = None
         self.n_jobs_ = None
         self.grid_search_ = None
         self.param_grid_ = None
 
-    def _build(self, classifier, reduction, metadata):
+    def _build(self, classifier, reduction, metadata, memory):
         """build the model"""
         steps = [
             # Extract the question & its creation time
@@ -377,7 +379,7 @@ class SMSGuruModel:
             # Add a classifier to the combined features
             steps.append(('classifier', classifier))
 
-        pipeline = Pipeline(steps)
+        pipeline = Pipeline(steps, memory)
 
         if not metadata:
             pipeline.set_params(union__creation_time=None)
