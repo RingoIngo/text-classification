@@ -18,7 +18,6 @@ from sklearn.feature_selection import SelectKBest, chi2
 # from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import roc_auc_score, make_scorer
-from sklearn.preprocessing import FunctionTransformer
 
 import model.text.text_tokenizer_and_cleaner as ttc
 import model.question_loader as ql
@@ -169,6 +168,19 @@ class CreationDateVectorizer(BaseEstimator, TransformerMixin):
     def get_feature_names(self):
         """Return the name of the cyclic feature components"""
         return ['CREATION_HOUR_SIN', 'CREATION_HOUR_COS']
+
+
+class DenseTransformer(TransformerMixin):
+
+    def transform(self, X, y=None, **fit_params):
+        return X.todense()
+
+    def fit_transform(self, X, y=None, **fit_params):
+        self.fit(X, y, **fit_params)
+        return self.transform(X)
+
+    def fit(self, X, y=None, **fit_params):
+        return self
 
 
 def _identity(words):
@@ -372,8 +384,7 @@ class SMSGuruModel:
                 # weight components in FeatureUnion
                 transformer_weights=None,
             )),
-            ('to_dense', FunctionTransformer(lambda x: x.todense(),
-                                             accept_sparse=True)),
+            ('to_dense', DenseTransformer()),
             ('reduce_dim', reduction),
         ]
 
