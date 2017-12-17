@@ -18,6 +18,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 # from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import roc_auc_score, make_scorer
+from sklearn.preprocessing import FunctionTransformer
 
 import model.text.text_tokenizer_and_cleaner as ttc
 import model.question_loader as ql
@@ -326,22 +327,21 @@ class SMSGuruModel:
 
     def __init__(self, classifier=MultinomialNB(),
                  reduction=SelectKBest(chi2, k=500),
-                 metadata=True, memory=False):
+                 metadata=True, memory=False, to_dense=False):
         self.classifier = classifier
         self.reduction = reduction
         self.metadata = metadata
         self.memory = memory
-        self.model = self._build(self.classifier,
-                                 self.reduction,
-                                 self.metadata,
-                                 self.memory)
+        self.to_dense = to_dense
+        self.model = self._build(self.classifier, self.reduction,
+                                 self.metadata, self.memory, to_dense)
         self.is_fitted = False
         self.CV_ = None
         self.n_jobs_ = None
         self.grid_search_ = None
         self.param_grid_ = None
 
-    def _build(self, classifier, reduction, metadata, memory):
+    def _build(self, classifier, reduction, metadata, memory, to_dense):
         """build the model"""
         steps = [
             # Extract the question & its creation time
@@ -372,6 +372,8 @@ class SMSGuruModel:
                 # weight components in FeatureUnion
                 transformer_weights=None,
             )),
+            ('to_dense', FunctionTransformer(lambda x: x.todense(),
+                                             accept_sparse=True)),
             ('reduce_dim', reduction),
         ]
 
@@ -383,6 +385,9 @@ class SMSGuruModel:
 
         if not metadata:
             pipeline.set_params(union__creation_time=None)
+
+        if not to_dense:
+            pipeline.set_params(to_dense=None)
 
         return Pipeline(steps)
 

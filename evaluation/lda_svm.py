@@ -12,7 +12,8 @@ import evaluation.shared as shared
 import model
 
 
-MODEL = model.SMSGuruModel(classifier=SVC(), reduction=LDA(), memory=True)
+MODEL = model.SMSGuruModel(classifier=SVC(), reduction=LDA(), memory=True,
+                           to_dense=True)
 
 # grid
 N_COMPONENTS_RANGE = np.arange(1, shared.N_PARENTCATS + 1)
