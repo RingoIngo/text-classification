@@ -16,7 +16,7 @@ def train_apply_classifer(classifier='lda_svm',
                           CV=10,
                           verbose=100):
 
-    sms_guru_model, param_grid = evaluation.make_model(classifier)
+    sms_guru_model, param_grid = evaluation.make_classifier_grid(classifier)
     sms_guru_model.set_question_loader(qfile_train, catfile, subcats)
     # fit all parameters and refit using the best
     sms_guru_model.gridsearch(param_grid, verbose=verbose, CV=CV,

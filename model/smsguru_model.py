@@ -256,7 +256,7 @@ def roc_auc_micro(y_true, y_score):
 SCORES = {'recall_macro': 'recall_macro',
           'precision_macro': 'precision_macro',
           'f1_macro': 'f1_macro',
-          'f1micro': 'f1micro',
+          'f1_micro': 'f1_micro',
           'roc_auc_micro': make_scorer(roc_auc_micro),
           'roc_auc': make_scorer(roc_auc)}
 
@@ -426,8 +426,8 @@ class SMSGuruModel:
                           stop_words_)
         return filtered_words
 
-    def set_question_loader(self, qfile='question_train.csv',
-                            catfile='category.csv',
+    def set_question_loader(self, qfile='./data/question_train.csv',
+                            catfile='./data/category.csv',
                             subcats=True,
                             verbose=False,
                             ):

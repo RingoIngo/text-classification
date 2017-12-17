@@ -1,6 +1,6 @@
 """
-The :mod: `evaluation` implements some helper functions for performing
-and saving the gridsearch results
+The :mod: `shared` implements some constants and
+helper functions for performing and saving the gridsearch results
 """
 # Author: Ingo Gühring
 
@@ -17,17 +17,6 @@ SUBCATS = False
 # number of jobs used in CV -> parallelize
 N_JOBS = -1
 N_PARENTCATS = 14
-
-
-def make_model(classifier):
-    if classifier == 'lda_svm':
-        return lda_svm.make_model()
-    elif classifier == 'svm':
-        # return svm.make_model()
-    elif classifier == 'knn':
-        # return knn.make_model()
-    else:
-        raise ValueError("Invalid classifier name")
 
 
 def merge_two_dicts(x, y):

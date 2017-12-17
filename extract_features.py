@@ -28,7 +28,7 @@ def extract_features(qfile='./data/question_train.csv',
                      min_df=2,
                      tokenizer='word_punct_tokenizer',
                      outfile='features.npz',
-                     verbose=False):
+                     verbose=0):
     """Extract features from files with questions and categories
 
     Extract features from data in SMSGuru format and save the computed
@@ -94,7 +94,7 @@ def extract_features(qfile='./data/question_train.csv',
     outfile : string, name of the file the output is saved to.
         should end with 'npz'. Default is 'features.npz'.
 
-    verbose : boolean, if True output about the state of the program
+    verbose : integer, if >0 output about the state of the program
         and the extracted features is printed to the console.
         Default is False.
 
@@ -213,8 +213,7 @@ if __name__ == "__main__":
                         choices=['word_punct_tokenizer', 'word_tokenizer'],
                         default=argparse.SUPPRESS)
 
-    parser.add_argument('-v', '--verbose', action='store_true',
-                        default=argparse.SUPPRESS)
+    parser.add_argument('-v', '--verbose', type=int, default=argparse.SUPPRESS)
 
     try:
         extract_features(**vars(parser.parse_args()))
