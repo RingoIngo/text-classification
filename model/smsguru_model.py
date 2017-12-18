@@ -170,7 +170,7 @@ class CreationDateVectorizer(BaseEstimator, TransformerMixin):
         return ['CREATION_HOUR_SIN', 'CREATION_HOUR_COS']
 
 
-class DenseTransformer(TransformerMixin):
+class DenseTransformer(BaseEstimator, TransformerMixin):
 
     def transform(self, X, y=None, **fit_params):
         return X.todense()
