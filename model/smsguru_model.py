@@ -271,7 +271,8 @@ SCORES = {'recall_macro': 'recall_macro',
           'f1_macro': 'f1_macro',
           'f1_micro': 'f1_micro',
           'roc_auc_micro': make_scorer(roc_auc_micro),
-          'roc_auc': make_scorer(roc_auc)}
+          # 'roc_auc': make_scorer(roc_auc)
+          }
 
 
 class SMSGuruModel:

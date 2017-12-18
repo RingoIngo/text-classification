@@ -14,8 +14,10 @@ import model
 
 
 classifier = OneVsRestClassifier(SVC())
+# binarize=True would be good for AUC score but LDA takes labels NOT in
+# binary format
 MODEL = model.SMSGuruModel(classifier=classifier, reduction=LDA(), memory=True,
-                           to_dense=True, binarize=True)
+                           to_dense=True, binarize=False)
 
 # grid
 N_COMPONENTS_RANGE = np.arange(1, shared.N_PARENTCATS + 1)
