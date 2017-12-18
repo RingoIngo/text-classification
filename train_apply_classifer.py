@@ -2,7 +2,7 @@
 The :mod: `train_apply_classifier` chaines the whole process needed for
 predicting a new data set together.
 """
-# Author: Ingo Gühring
+# Author: Ingo Guehring
 
 import evaluation
 

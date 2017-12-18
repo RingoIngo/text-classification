@@ -1,7 +1,7 @@
 """
 The :mod: `classifier_grid_factory`
 """
-# Author: Ingo Gühring
+# Author: Ingo Guehring
 
 import evaluation.lda_svm as lda_svm
 # import evaluation.svm

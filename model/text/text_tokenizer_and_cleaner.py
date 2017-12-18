@@ -2,7 +2,7 @@
 The :mod: `text_tokenizer_and_cleaner` contains the `TextTokenizerAndCleaner`
 class, which handles the preprocessing of the text
 """
-# Author: Ingo Gühring
+# Author: Ingo Guehring
 # This module is inspired by the book
 #    `Applied Text Analysis with Python` by
 #    Bengfort, Ojeda and Bilbro

@@ -2,7 +2,7 @@
 The :mod:`question_loader` module implements a class which handles the loading
 and the properties of the question files
 """
-# Author: Ingo Gühring
+# Author: Ingo Guehring
 
 import csv
 import pprint

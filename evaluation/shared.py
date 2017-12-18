@@ -2,7 +2,7 @@
 The :mod: `shared` implements some constants and
 helper functions for performing and saving the gridsearch results
 """
-# Author: Ingo Gühring
+# Author: Ingo Guehring
 
 from time import gmtime, strftime
 import numpy as np

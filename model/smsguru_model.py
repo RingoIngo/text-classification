@@ -2,7 +2,7 @@
 The :mod: `smsguru_model` implements and evaluates the model for the
 sms guru data set. The most important class is the SMSGuruModel.
 """
-# Author: Ingo Gühring
+# Author: Ingo Guehring
 
 from time import gmtime, strftime
 from itertools import compress

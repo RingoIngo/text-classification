@@ -2,7 +2,7 @@
 The :mod: `evaluate_lda_svm` implements the model and the constants needed
 for the evalutation of LDA as dimensionality reduction and SVM as
 classifier"""
-# Author: Ingo Gühring
+# Author: Ingo Guehring
 
 import numpy as np
 from sklearn.svm import SVC

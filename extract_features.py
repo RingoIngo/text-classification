@@ -2,7 +2,7 @@
 The :mod:`extract_features` module implements the function
 `extract_features`
 """
-# Author: Ingo Gühring
+# Author: Ingo Guehring
 import argparse
 
 import numpy as np
