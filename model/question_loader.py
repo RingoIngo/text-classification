@@ -179,7 +179,8 @@ class QuestionLoader(object):
                 nsyntax_errors, self.qfile))
         categoryids = np.asarray(categoryids)
         if binarize:
-            categoryids = label_binarize(categoryids, self.categories.keys())
+            categoryids = label_binarize(categoryids,
+                list(self.categories.keys()))
         return questions, categoryids
 
     def _get_category_counts(self, verbose):
