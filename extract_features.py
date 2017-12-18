@@ -166,7 +166,7 @@ def extract_features(qfile='./data/question_train.csv',
         if featurenames is not None:
             print("feature names: {}".format(featurenames))
     # save extracted features
-    np.savez(outfile, features=features.T.toarray(),
+    np.savez(outfile, features=features.T,
              featurenames=featurenames,
              categoryids=sms_guru_model.question_loader_.categoryids[None, :],
              categories=sms_guru_model.question_loader_.categories)
