@@ -21,7 +21,8 @@ MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None, memory=True,
 GAMMA_RANGE = np.logspace(-3, 3, 10)
 C_RANGE = np.logspace(-3, 3, 10)
 
-PARAM_GRID = [dict(classifier__estimator__gamma=GAMMA_RANGE, classifier__estimator__C=C_RANGE)]
+PARAM_GRID = [dict(classifier__estimator__gamma=GAMMA_RANGE,
+                   classifier__estimator__C=C_RANGE)]
 
 
 def evaluate():

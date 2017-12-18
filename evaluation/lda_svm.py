@@ -25,10 +25,11 @@ C_RANGE = np.logspace(-3, 3, 7)
 
 # this could also be used: classifier_kernel=kernels,
 PARAM_GRID_DIM = [dict(reduce_dim__n_components=N_COMPONENTS_RANGE,
-                       classifier__gamma=GAMMA_RANGE,
-                       classifier__C=C_RANGE)]
+                       classifier__estimator__gamma=GAMMA_RANGE,
+                       classifier__estimator__C=C_RANGE)]
 
-PARAM_GRID = [dict(classifier__gamma=GAMMA_RANGE, classifier__C=C_RANGE)]
+PARAM_GRID = [dict(classifier__estimator__gamma=GAMMA_RANGE,
+                   classifier__estimator__C=C_RANGE)]
 
 
 def evaluate():

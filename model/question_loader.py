@@ -63,7 +63,7 @@ class QuestionLoader(object):
             verbose)
         self.questions, self.categoryids = (
             self._read_question_file(verbose, binarize=self.binarize))
-        self.category_counts = self._get_category_counts(verbose)
+        # self.category_counts = self._get_category_counts(verbose)
         if verbose and self.metadata:
             print("""Warning: Using the metadata option may reduce the
                   number of samples that can be used, since they must
@@ -180,7 +180,7 @@ class QuestionLoader(object):
         categoryids = np.asarray(categoryids)
         if binarize:
             categoryids = label_binarize(categoryids,
-                list(self.categories.keys()))
+                                         list(self.categories.keys()))
         return questions, categoryids
 
     def _get_category_counts(self, verbose):
