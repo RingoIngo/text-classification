@@ -338,13 +338,14 @@ class SMSGuruModel:
     """
 
     def __init__(self, classifier=MultinomialNB(),
-                 reduction=SelectKBest(chi2, k=500),
-                 metadata=True, memory=False, to_dense=False):
+                 reduction=SelectKBest(chi2, k=500), metadata=True,
+                 memory=False, to_dense=False, binarize=False):
         self.classifier = classifier
         self.reduction = reduction
         self.metadata = metadata
         self.memory = memory
         self.to_dense = to_dense
+        self.binarize = binarize
         self.model = self._build(self.classifier, self.reduction,
                                  self.metadata, self.memory, to_dense)
         self.is_fitted = False
@@ -476,6 +477,7 @@ class SMSGuruModel:
         self.question_loader_ = ql.QuestionLoader(qfile=qfile,
                                                   catfile=catfile,
                                                   subcats=subcats,
+                                                  binarize=self.binarize,
                                                   metadata=self.metadata,
                                                   verbose=verbose)
         return self

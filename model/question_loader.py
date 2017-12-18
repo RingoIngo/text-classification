@@ -10,6 +10,8 @@ from datetime import datetime
 import operator
 import numpy as np
 
+from sklearn.preprocessing import label_binarize
+
 
 class QuestionLoader(object):
     """A loader and container for all properties of the data files.
@@ -48,16 +50,19 @@ class QuestionLoader(object):
 
     def __init__(self, qfile='question_train.csv',
                  catfile='category.csv',
+                 binarize=False,
                  metadata=False,
                  subcats=True,
                  verbose=False):
         self.qfile = qfile
         self.catfile = catfile
+        self.binarize = binarize
         self.metadata = metadata
         self.subcats = subcats
         self.categories, self.parentdictionary = self._read_category_file(
             verbose)
-        self.questions, self.categoryids = self._read_question_file(verbose)
+        self.questions, self.categoryids = (
+            self._read_question_file(verbose, binarize=self.binarize))
         self.category_counts = self._get_category_counts(verbose)
         if verbose and self.metadata:
             print("""Warning: Using the metadata option may reduce the
@@ -121,7 +126,7 @@ class QuestionLoader(object):
                 nsyntax_errors, self.catfile))
         return categories, parentdic
 
-    def _read_question_file(self, verbose):
+    def _read_question_file(self, verbose, binarize):
         """reads and stores the questions and corresponding categories.
 
         If ``subcats`` attribute is false the categories read from
@@ -172,7 +177,10 @@ class QuestionLoader(object):
         if verbose:
             print("{} not in {} read because of syntax errors".format(
                 nsyntax_errors, self.qfile))
-        return questions, np.asarray(categoryids)
+        categoryids = np.asarray(categoryids)
+        if binarize:
+            categoryids = label_binarize(categoryids, self.categories.keys())
+        return questions, categoryids
 
     def _get_category_counts(self, verbose):
         unique, counts = np.unique(self.categoryids, return_counts=True)
