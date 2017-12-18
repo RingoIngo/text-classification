@@ -12,7 +12,8 @@ import model
 
 
 CLASSIFIER = OneVsRestClassifier(SVC())
-MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None, memory=True)
+MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None, memory=True,
+                           binarize=True)
 
 # grid
 # kernels = ['linear', 'rbf']
