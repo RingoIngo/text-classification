@@ -7,13 +7,15 @@ classifier"""
 import numpy as np
 from sklearn.svm import SVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.multiclass import OneVsRestClassifier
 
 import evaluation.shared as shared
 import model
 
 
-MODEL = model.SMSGuruModel(classifier=SVC(), reduction=LDA(), memory=True,
-                           to_dense=True)
+classifier = OneVsRestClassifier(SVC())
+MODEL = model.SMSGuruModel(classifier=classifier, reduction=LDA(), memory=True,
+                           to_dense=True, binarize=True)
 
 # grid
 N_COMPONENTS_RANGE = np.arange(1, shared.N_PARENTCATS + 1)
