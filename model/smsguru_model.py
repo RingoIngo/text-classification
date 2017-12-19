@@ -17,7 +17,8 @@ from sklearn.model_selection import GridSearchCV, cross_val_score
 from sklearn.feature_selection import SelectKBest, chi2
 # from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import roc_auc_score, make_scorer
+from sklearn.metrics import roc_auc_score
+# from sklearn.metrics import make_scorer
 
 import model.text.text_tokenizer_and_cleaner as ttc
 import model.question_loader as ql
@@ -270,7 +271,7 @@ SCORES = {'recall_macro': 'recall_macro',
           'precision_macro': 'precision_macro',
           'f1_macro': 'f1_macro',
           'f1_micro': 'f1_micro',
-          'roc_auc_micro': make_scorer(roc_auc_micro),
+          # 'roc_auc_micro': make_scorer(roc_auc_micro),
           # 'roc_auc': make_scorer(roc_auc)
           }
 
