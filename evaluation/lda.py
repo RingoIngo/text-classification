@@ -12,7 +12,7 @@ import model
 MODEL = model.SMSGuruModel(classifier=LDA(), reduction=None, memory=True)
 
 # PARAM_GRID = {}
-PARAM_GRID = dict(classifier__solver='svd')
+PARAM_GRID = dict(classifier__solver=['svd'])
 
 
 def evaluate():
