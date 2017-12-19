@@ -5,6 +5,8 @@ classifier"""
 # Author: Ingo Guehring
 
 import numpy as np
+from sklearn.decomposition import TruncatedSVD
+from sklearn.random_projection import SparseRandomProjection
 from sklearn.svm import SVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.multiclass import OneVsRestClassifier
@@ -12,15 +14,18 @@ from sklearn.multiclass import OneVsRestClassifier
 import evaluation.shared as shared
 import model
 
-
+# pre_reduction = TruncatedSVD(n_components=500)
+pre_reduction = SparseRandomProjection(n_components=500)
 classifier = OneVsRestClassifier(SVC())
 # binarize=True would be good for AUC score but LDA takes labels NOT in
 # binary format
-MODEL = model.SMSGuruModel(classifier=classifier, reduction=LDA(), memory=True,
-                           to_dense=True, binarize=False)
+MODEL = model.SMSGuruModel(classifier=classifier,
+                           pre_reduction=pre_reduction,
+                           reduction=LDA(),
+                           memory=True)
 
 # grid
-N_COMPONENTS_RANGE = np.arange(1, shared.N_PARENTCATS + 1)
+N_COMPONENTS_RANGE = [1, 2, 4, 6, 8, 10, 12, 14]
 # kernels = ['linear', 'rbf']
 GAMMA_RANGE = np.logspace(-3, 3, 7)
 C_RANGE = np.logspace(-3, 3, 7)

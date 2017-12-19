@@ -339,23 +339,33 @@ class SMSGuruModel:
     """
 
     def __init__(self, classifier=MultinomialNB(),
-                 reduction=SelectKBest(chi2, k=500), metadata=True,
-                 memory=False, to_dense=False, binarize=False):
+                 pre_reduction=None,
+                 reduction=SelectKBest(chi2, k=500),
+                 metadata=True,
+                 memory=False,
+                 to_dense=False,
+                 binarize=False):
         self.classifier = classifier
+        self.pre_reduction = pre_reduction
         self.reduction = reduction
         self.metadata = metadata
         self.memory = memory
         self.to_dense = to_dense
         self.binarize = binarize
-        self.model = self._build(self.classifier, self.reduction,
-                                 self.metadata, self.memory, to_dense)
+        self.model = self._build(self.classifier,
+                                 self.pre_reduction,
+                                 self.reduction,
+                                 self.metadata,
+                                 self.memory,
+                                 to_dense)
         self.is_fitted = False
         self.CV_ = None
         self.n_jobs_ = None
         self.grid_search_ = None
         self.param_grid_ = None
 
-    def _build(self, classifier, reduction, metadata, memory, to_dense):
+    def _build(self, classifier, pre_reduction, reduction, metadata, memory,
+               to_dense):
         """build the model"""
         steps = [
             # Extract the question & its creation time
@@ -386,6 +396,7 @@ class SMSGuruModel:
                 # weight components in FeatureUnion
                 transformer_weights=None,
             )),
+            ('pre_reduce_dim', pre_reduction),
             ('to_dense', DenseTransformer()),
             ('reduce_dim', reduction),
         ]
