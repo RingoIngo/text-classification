@@ -8,13 +8,13 @@ from sklearn.neighbors import KNeighborsClassifier
 
 import evaluation.shared as shared
 import model
+import model.knn
 
 
 # algorithm='brute' see stackoverflow --> Zotero, since X is sparse,
 # which is good for metric (no real metric)
-CLASSIFIER = KNeighborsClassifier(weights='distance',
+CLASSIFIER = KNeighborsClassifier(weights=model.knn.cosine_dist_to_sim,
                                   metric=model.knn.cosine_semi_metric,
-                                  weigths=model.knn.cosine_dist_to_sim,
                                   n_jobs=shared.N_JOBS)
 # metadata=False since cosine similiarity measure
 MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None,
