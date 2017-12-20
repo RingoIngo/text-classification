@@ -1,3 +1,4 @@
+import pdb
 import collections
 import math
 import numpy as np
@@ -100,6 +101,7 @@ class KNeighborsClassifierB(KNeighborsClassifier):
                 neigh_sim_sorted_ind[:, 0:label_top_n]]
             # total.shape = [n_samples,]
             total = np.sum(label_top_n_sim, axis=1)
+            pdb.set_trace()
             weighted_counts = np.sum(
                 label_top_n_sim * label_top_n_labels == label, axis=1)
             label_counts[i, :] = weighted_counts / total
