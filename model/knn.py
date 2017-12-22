@@ -1,4 +1,3 @@
-import pdb
 import collections
 import math
 import numpy as np
@@ -69,7 +68,6 @@ class KNeighborsClassifierB(KNeighborsClassifier):
         for i, label in enumerate(self.classes_):
             label_top_n = self.top_n[label]
             # label_top_n_sim.shape = [n_sample,label_top_n]
-            pdb.set_trace()
             label_top_n_sim = neigh_sim[
                 np.arange(n_samples)[:, np.newaxis], np.arange(label_top_n)]
             label_top_n_labels = neigh_labels[
