@@ -96,12 +96,14 @@ class KNeighborsClassifierB(KNeighborsClassifier):
         for i, label in enumerate(self.classes_):
             label_top_n = self.top_n[label]
             # label_top_n_sim.shape = [n_sample,label_top_n]
-            label_top_n_sim = neigh_sim[neigh_sim_sorted_ind[:, 0:label_top_n]]
+            label_top_n_sim = neigh_sim[np.arange(n_samples)[:, np.newaxis], neigh_sim_sorted_ind[:, 0:label_top_n]]
+            # label_top_n_labels = neigh_labels[
+            #     neigh_sim_sorted_ind[:, 0:label_top_n]]
             label_top_n_labels = neigh_labels[
-                neigh_sim_sorted_ind[:, 0:label_top_n]]
+                np.arange(n_samples)[:, np.newaxis], neigh_sim_sorted_ind[:, 0:label_top_n]]
             # total.shape = [n_samples,]
             total = np.sum(label_top_n_sim, axis=1)
-            pdb.set_trace()
+            # pdb.set_trace()
             weighted_counts = np.sum(
                 label_top_n_sim * label_top_n_labels == label, axis=1)
             label_counts[i, :] = weighted_counts / total
