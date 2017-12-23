@@ -267,6 +267,11 @@ def roc_auc_micro(y_true, y_score):
     return roc_auc_score(y_true, y_score, average='micro')
 
 
+def roc_auc_macro(y_true, y_score):
+    """Wrapper function for roc_auc_score with average='macro'"""
+    return roc_auc_score(y_true, y_score, average='macro')
+
+
 SCORES = {'recall_macro': 'recall_macro',
           'precision_macro': 'precision_macro',
           'f1_macro': 'f1_macro',
@@ -281,7 +286,8 @@ SCORES_BIN = {'recall_macro': 'recall_macro',
               'f1_macro': 'f1_macro',
               'f1_micro': 'f1_micro',
               'roc_auc_micro': make_scorer(roc_auc_micro),
-              'roc_auc': make_scorer(roc_auc)
+              'roc_auc_macro': make_scorer(roc_auc_macro),
+              # 'roc_auc': make_scorer(roc_auc)
               }
 
 
