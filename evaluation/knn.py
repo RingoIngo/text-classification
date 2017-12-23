@@ -27,14 +27,19 @@ N_NEIGHBORS_RANGE = np.arange(5, 65, 5)
 PARAM_GRID = dict(classifier__n_neighbors=N_NEIGHBORS_RANGE)
 
 
-def evaluate():
+def evaluate(gridsearch=True, gen_error=True):
     MODEL.set_question_loader(subcats=shared.SUBCATS)
-    MODEL.gridsearch(param_grid=PARAM_GRID, n_jobs=shared.N_JOBS, CV=shared.CV)
-    shared.save_and_report(
-        results=MODEL.grid_search_.cv_results_,
-        folder='knn')
+    if gridsearch:
+        MODEL.gridsearch(param_grid=PARAM_GRID, n_jobs=shared.N_JOBS,
+                         CV=shared.CV)
+        shared.save_and_report(
+            results=MODEL.grid_search_.cv_results_,
+            folder='knn')
 
-    nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV)
-    shared.save_and_report(results=nested_scores,
-                           folder='knn',
-                           name='gen_error.npy')
+    if gen_error:
+        nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID,
+                                        CV=shared.CV,
+                                        scoring=shared.GEN_ERROR_SCORE)
+        shared.save_and_report(results=nested_scores,
+                               folder='knn',
+                               name='gen_error.npy')

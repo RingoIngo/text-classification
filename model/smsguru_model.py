@@ -584,7 +584,7 @@ class SMSGuruModel:
                               self.question_loader_.categoryids)
         return self
 
-    def nested_cv(self, param_grid, CV=5):
+    def nested_cv(self, param_grid, CV=5, scoring='f1_micro'):
         """
         Perform a nested gridsearch to evaluate an estimator with param grid
 
@@ -622,7 +622,7 @@ class SMSGuruModel:
                          cv=CV,
                          X=self.question_loader_.questions,
                          y=self.question_loader_.categoryids,
-                         scoring='f1_micro')
+                         scoring=scoring)
 
 
 if __name__ == "__main__":
