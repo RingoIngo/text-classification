@@ -4,8 +4,8 @@ for the evalutation of LDA as dimensionality reduction and SVM as
 classifier"""
 # Author: Ingo Guehring
 
-import numpy as np
-from sklearn.decomposition import TruncatedSVD
+# import numpy as np
+# from sklearn.decomposition import TruncatedSVD
 from sklearn.random_projection import SparseRandomProjection
 from sklearn.svm import SVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
@@ -27,8 +27,14 @@ MODEL = model.SMSGuruModel(classifier=classifier,
 # grid
 N_COMPONENTS_RANGE = [1, 2, 4, 6, 8, 10, 12, 14]
 # kernels = ['linear', 'rbf']
-GAMMA_RANGE = np.logspace(-3, 3, 7)
-C_RANGE = np.logspace(-3, 3, 7)
+
+# old range, that turned out to be too small
+# GAMMA_RANGE = np.logspace(-3, 3, 7)
+# C_RANGE = np.logspace(-3, 3, 7)
+
+# new wider range
+C_RANGE = shared.C_RANGE
+GAMMA_RANGE = shared.GAMMA_RANGE
 
 # this could also be used: classifier_kernel=kernels,
 PARAM_GRID_DIM = [dict(reduce_dim__n_components=N_COMPONENTS_RANGE,

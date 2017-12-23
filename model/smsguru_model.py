@@ -18,7 +18,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 # from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import roc_auc_score
-# from sklearn.metrics import make_scorer
+from sklearn.metrics import make_scorer
 
 import model.text.text_tokenizer_and_cleaner as ttc
 import model.question_loader as ql
@@ -274,6 +274,15 @@ SCORES = {'recall_macro': 'recall_macro',
           # 'roc_auc_micro': make_scorer(roc_auc_micro),
           # 'roc_auc': make_scorer(roc_auc)
           }
+
+
+SCORES_BIN = {'recall_macro': 'recall_macro',
+              'precision_macro': 'precision_macro',
+              'f1_macro': 'f1_macro',
+              'f1_micro': 'f1_micro',
+              'roc_auc_micro': make_scorer(roc_auc_micro),
+              'roc_auc': make_scorer(roc_auc)
+              }
 
 
 class SMSGuruModel:
@@ -550,11 +559,16 @@ class SMSGuruModel:
         self.CV_ = CV
         self.n_jobs_ = n_jobs
         self.param_grid_ = param_grid
+        # if labels are binary we can use the AUC metrics
+        if self.binarize:
+            scores = SCORES_BIN
+        else:
+            scores = SCORES
 
         self.grid_search_ = GridSearchCV(self.model, cv=self.CV_,
                                          param_grid=self.param_grid_,
                                          return_train_score=True,
-                                         scoring=SCORES,
+                                         scoring=scores,
                                          refit=False,
                                          error_score=-1,
                                          n_jobs=self.n_jobs_,
