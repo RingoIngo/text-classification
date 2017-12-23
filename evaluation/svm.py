@@ -41,8 +41,7 @@ def evaluate(gridsearch=True, gen_error=True):
             folder='svm')
 
     if gen_error:
-        nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV,
-                                        scoring=shared.GEN_ERROR_SCORE)
+        nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV)
         shared.save_and_report(results=nested_scores,
                                folder='svm',
                                name='gen_error.npy')

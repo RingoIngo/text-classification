@@ -58,8 +58,7 @@ def evaluate(gridsearch=True, gen_error=True):
     if gen_error:
         # since in this case the higher the dimension the better the estimator
         # we do not include the lower dimensions in this search
-        nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV,
-                                        scoring=shared.GEN_ERROR_SCORE)
+        nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV)
         shared.save_and_report(results=nested_scores,
                                folder='lda_svm',
                                name='gen_error.npy')

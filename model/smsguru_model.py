@@ -19,6 +19,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import make_scorer
+from sklearn.preprocessing import LabelBinarizer
 
 import model.text.text_tokenizer_and_cleaner as ttc
 import model.question_loader as ql
@@ -254,31 +255,41 @@ def nested_cv(estimator, param_grid, cv, X, y, scoring):
     return cross_val_score(clf, X=X, y=y, cv=cv, scoring=scoring, verbose=100)
 
 
+PARENT_CLASSES = [13, 12, 11, 7, 8, 9, 10, 14, 15, 16, 17, 18, 19, 74]
+PARENT_LABEL_BINARIZER = LabelBinarizer().fit(PARENT_CLASSES)
+
+
 # for multiclass it holds:
 # recall_micro = precision_micro = f1_micro = accuracy
 # SCORES = ['recall_macro', 'precision_macro', 'f1_macro', 'f1_micro']
 def roc_auc(y_true, y_score):
     """Wrapper function for roc_auc_score with average=None"""
-    return roc_auc_score(y_true, y_score, average=None)
+    y_true_bin = PARENT_LABEL_BINARIZER.transform(y_true)
+    y_score_bin = PARENT_LABEL_BINARIZER.transform(y_score)
+    return roc_auc_score(y_true_bin, y_score_bin, average=None)
 
 
 def roc_auc_micro(y_true, y_score):
     """Wrapper function for roc_auc_score with average='micro'"""
-    return roc_auc_score(y_true, y_score, average='micro')
+    y_true_bin = PARENT_LABEL_BINARIZER.transform(y_true)
+    y_score_bin = PARENT_LABEL_BINARIZER.transform(y_score)
+    return roc_auc_score(y_true_bin, y_score_bin, average='micro')
 
 
 def roc_auc_macro(y_true, y_score):
     """Wrapper function for roc_auc_score with average='macro'"""
-    return roc_auc_score(y_true, y_score, average='macro')
+    y_true_bin = PARENT_LABEL_BINARIZER.transform(y_true)
+    y_score_bin = PARENT_LABEL_BINARIZER.transform(y_score)
+    return roc_auc_score(y_true_bin, y_score_bin, average='macro')
 
 
-SCORES = {'recall_macro': 'recall_macro',
-          'precision_macro': 'precision_macro',
-          'f1_macro': 'f1_macro',
-          'f1_micro': 'f1_micro',
-          # 'roc_auc_micro': make_scorer(roc_auc_micro),
-          # 'roc_auc': make_scorer(roc_auc)
-          }
+# SCORES = {'recall_macro': 'recall_macro',
+#           'precision_macro': 'precision_macro',
+#           'f1_macro': 'f1_macro',
+#           'f1_micro': 'f1_micro',
+#           # 'roc_auc_micro': make_scorer(roc_auc_micro),
+#           # 'roc_auc': make_scorer(roc_auc)
+#           }
 
 
 SCORES_BIN = {'recall_macro': 'recall_macro',
@@ -566,15 +577,15 @@ class SMSGuruModel:
         self.n_jobs_ = n_jobs
         self.param_grid_ = param_grid
         # if labels are binary we can use the AUC metrics
-        if self.binarize:
-            scores = SCORES_BIN
-        else:
-            scores = SCORES
+        # if self.binarize:
+        #     scores = SCORES_BIN
+        # else:
+        #     scores = SCORES
 
         self.grid_search_ = GridSearchCV(self.model, cv=self.CV_,
                                          param_grid=self.param_grid_,
                                          return_train_score=True,
-                                         scoring=scores,
+                                         scoring=SCORES_BIN,
                                          refit=False,
                                          error_score=-1,
                                          n_jobs=self.n_jobs_,
@@ -584,7 +595,7 @@ class SMSGuruModel:
                               self.question_loader_.categoryids)
         return self
 
-    def nested_cv(self, param_grid, CV=5, scoring='f1_micro'):
+    def nested_cv(self, param_grid, CV=5, scoring=make_scorer(roc_auc_micro)):
         """
         Perform a nested gridsearch to evaluate an estimator with param grid
 

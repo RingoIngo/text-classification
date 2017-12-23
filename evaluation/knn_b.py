@@ -36,8 +36,7 @@ def evaluate(gridsearch=True, gen_error=True):
             name='knn_b_grids_cv.npy')
 
     if gen_error:
-        nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV,
-                                        scoring=shared.GEN_ERROR_SCORE)
+        nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV)
         shared.save_and_report(results=nested_scores,
                                folder='knn',
                                name='knn_b_gen_error.npy')
