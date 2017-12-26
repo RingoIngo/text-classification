@@ -15,7 +15,7 @@ import model
 reduction = SparseRandomProjection(n_components=500)
 CLASSIFIER = OneVsRestClassifier(SVC())
 MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=reduction,
-                           memory=True, binarize=True)
+                           memory=True)
 
 # grid
 # kernels = ['linear', 'rbf']
