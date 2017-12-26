@@ -59,23 +59,29 @@ class KNeighborsClassifierB(KNeighborsClassifier):
         # bcz of numerical reasons we don't use the mode approach here
 
         neigh_sim = cosine_dist_to_sim(neigh_dist)
+        # self._y does not contain labels!
+        # it contains the indices of the labels in self.classes_
+        # see SupervisedIntegerMixin fit() method
         neigh_labels = self._y[neigh_ind]
         # dict where lables are keys and
         # items arrays ([n_samples]), the label probs
         n_samples = X.shape[0]
-        n_classes = len(self.classes_)
+        classes = self.classes_
+        n_classes = len(classes)
         label_counts = np.empty((n_classes, n_samples))
-        for i, label in enumerate(self.classes_):
+        for i, label in enumerate(classes):
             label_top_n = self.top_n[label]
             # label_top_n_sim.shape = [n_sample,label_top_n]
             label_top_n_sim = neigh_sim[
                 np.arange(n_samples)[:, np.newaxis], np.arange(label_top_n)]
-            label_top_n_labels = neigh_labels[
+            label_top_n_labels_idx = neigh_labels[
                 np.arange(n_samples)[:, np.newaxis], np.arange(label_top_n)]
             # total.shape = [n_samples,]
             total = np.sum(label_top_n_sim, axis=1)
+            label_idx = np.where(classes == label)[0][0]
             weighted_counts = np.sum(
-                label_top_n_sim * (label_top_n_labels == label), axis=1)
+                label_top_n_sim * (label_top_n_labels_idx == label_idx),
+                axis=1)
             label_counts[i, :] = weighted_counts / total
         y_pred = self.classes_[np.argmax(label_counts, axis=0)]
         return y_pred

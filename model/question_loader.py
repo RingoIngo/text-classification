@@ -48,8 +48,8 @@ class QuestionLoader(object):
         printed to the console.
     """
 
-    def __init__(self, qfile='question_train.csv',
-                 catfile='category.csv',
+    def __init__(self, qfile='./data/question_train.csv',
+                 catfile='./data/category.csv',
                  binarize=False,
                  metadata=False,
                  subcats=True,
