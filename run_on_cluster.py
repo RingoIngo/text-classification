@@ -33,7 +33,7 @@ def evaluate(classifier=None, gridsearch=False, gen_error=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='evaluate classifier')
     parser.add_argument('-c', '--classifier',
-                        choices=['svm', 'lda_svm', 'knn', 'knn_', 'lda'],
+                        choices=['svm', 'lda_svm', 'knn', 'knn_b', 'lda'],
                         default=argparse.SUPPRESS)
 
     parser.add_argument('-gs', '--gridsearch', dest='gridsearch',
