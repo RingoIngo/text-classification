@@ -15,14 +15,8 @@ import evaluation.shared as shared
 import model
 
 # pre_reduction = TruncatedSVD(n_components=500)
-pre_reduction = SparseRandomProjection(n_components=500)
-classifier = OneVsRestClassifier(SVC())
-# binarize=True would be good for AUC score but LDA takes labels NOT in
-# binary format
-MODEL = model.SMSGuruModel(classifier=classifier,
-                           pre_reduction=pre_reduction,
-                           reduction=LDA(),
-                           memory=True)
+PRE_REDUCTION = SparseRandomProjection(n_components=500)
+CLASSIFIER = OneVsRestClassifier(SVC())
 
 # grid
 N_COMPONENTS_RANGE = [1, 2, 4, 6, 8, 10, 12, 14]
@@ -45,7 +39,11 @@ PARAM_GRID = [dict(classifier__estimator__gamma=GAMMA_RANGE,
                    classifier__estimator__C=C_RANGE)]
 
 
-def evaluate(gridsearch=True, gen_error=True):
+def evaluate(gridsearch=True, gen_error=True, memory=True):
+    MODEL = model.SMSGuruModel(classifier=CLASSIFIER,
+                               pre_reduction=PRE_REDUCTION,
+                               reduction=LDA(),
+                               memory=memory)
     MODEL.set_question_loader(subcats=shared.SUBCATS)
     if gridsearch:
         MODEL.gridsearch(param_grid=PARAM_GRID_DIM,

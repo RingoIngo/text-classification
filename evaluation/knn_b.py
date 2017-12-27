@@ -14,10 +14,6 @@ from model.knn import KNeighborsClassifierB
 # algorithm='brute' see stackoverflow --> Zotero, since X is sparse,
 # which is good for metric (no real metric)
 CLASSIFIER = KNeighborsClassifierB(n_jobs=shared.N_JOBS)
-# metadata=False since cosine similiarity measure
-MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None,
-                           metadata=False, memory=True)
-
 
 # grid
 N_NEIGHBORS_RANGE = np.arange(5, 65, 5)
@@ -25,7 +21,10 @@ N_NEIGHBORS_RANGE = np.arange(5, 65, 5)
 PARAM_GRID = dict(classifier__n_neighbors=N_NEIGHBORS_RANGE)
 
 
-def evaluate(gridsearch=True, gen_error=True):
+def evaluate(gridsearch=True, gen_error=True, memory=True):
+    # metadata=False since cosine similiarity measure
+    MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None,
+                               metadata=False, memory=memory)
     MODEL.set_question_loader(subcats=shared.SUBCATS)
     if gridsearch:
         MODEL.gridsearch(param_grid=PARAM_GRID, n_jobs=shared.N_JOBS,

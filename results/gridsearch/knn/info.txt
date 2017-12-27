@@ -1,5 +1,5 @@
 2017-12-20_10:12:45grids_cv.npy "old knn_a without roc
-2017-12-20_20:25:58gen_error.npy "old knn_a without roc
+2017-12-20_20:25:58gen_error.npy "f_1 micro?
 2017-12-25_02:39:28grids_cv.npy "new knn_a with roc
-2017-12-25_12:17:27gen_error.npy "new knn_a with roc
+2017-12-25_12:17:27gen_error.npy "roc_auc micro
 2017-12-27_07:18:37knn_b_grids_cv.npy "new knn_a with roc

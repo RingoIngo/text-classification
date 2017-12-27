@@ -14,8 +14,6 @@ import model
 
 reduction = SparseRandomProjection(n_components=500)
 CLASSIFIER = OneVsRestClassifier(SVC())
-MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=reduction,
-                           memory=True)
 
 # grid
 # kernels = ['linear', 'rbf']
@@ -31,7 +29,9 @@ PARAM_GRID = [dict(classifier__estimator__gamma=GAMMA_RANGE,
                    classifier__estimator__C=C_RANGE)]
 
 
-def evaluate(gridsearch=True, gen_error=True):
+def evaluate(gridsearch=True, gen_error=True, memory=True):
+    MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=reduction,
+                               memory=memory)
     MODEL.set_question_loader(subcats=shared.SUBCATS)
     if gridsearch:
         MODEL.gridsearch(param_grid=PARAM_GRID, n_jobs=shared.N_JOBS,
