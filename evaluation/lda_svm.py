@@ -19,7 +19,7 @@ PRE_REDUCTION = SparseRandomProjection(n_components=500)
 CLASSIFIER = OneVsRestClassifier(SVC())
 
 # grid
-N_COMPONENTS_RANGE = [1, 2, 4, 6, 8, 10, 12, 14]
+N_COMPONENTS_RANGE = [1, 2, 4, 6, 8, 10, 12, 13]
 # kernels = ['linear', 'rbf']
 
 # old range, that turned out to be too small

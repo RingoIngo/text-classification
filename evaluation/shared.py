@@ -22,8 +22,8 @@ N_JOBS = -1
 N_PARENTCATS = 14
 
 # for SVM RBF
-C_RANGE = np.logspace(-2, 10, 13)
-GAMMA_RANGE = np.logspace(-9, 3, 13)
+C_RANGE = np.logspace(-2, 6, 9)
+GAMMA_RANGE = np.logspace(-8, 0, 9)
 
 
 def merge_two_dicts(x, y):
