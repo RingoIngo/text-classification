@@ -21,9 +21,17 @@ SUBCATS = False
 N_JOBS = -1
 N_PARENTCATS = 14
 
+# deprecated
+# # for SVM RBF
+# C_RANGE = np.logspace(-2, 6, 9)
+# GAMMA_RANGE = np.logspace(-8, 0, 9)
+
 # for SVM RBF
-C_RANGE = np.logspace(-2, 6, 9)
-GAMMA_RANGE = np.logspace(-8, 0, 9)
+# see time plot
+C_RANGE = np.logspace(-2, 5, 8)
+GAMMA_RANGE = np.logspace(-7, 0, 8)
+
+
 
 
 def merge_two_dicts(x, y):

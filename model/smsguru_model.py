@@ -276,10 +276,17 @@ def roc_auc_micro(y_true, y_score):
     return roc_auc_score(y_true_bin, y_score_bin, average='micro')
 
 
-def roc_auc_macro(y_true, y_score):
+# def roc_auc_macro(y_true, y_score):
+#     """Wrapper function for roc_auc_score with average='macro'"""
+#     y_true_bin = PARENT_LABEL_BINARIZER.transform(y_true)
+#     y_score_bin = PARENT_LABEL_BINARIZER.transform(y_score)
+#     return roc_auc_score(y_true_bin, y_score_bin, average='macro')
+#
+#
+def roc_auc_macro(estimator, X, y):
     """Wrapper function for roc_auc_score with average='macro'"""
-    y_true_bin = PARENT_LABEL_BINARIZER.transform(y_true)
-    y_score_bin = PARENT_LABEL_BINARIZER.transform(y_score)
+    y_true_bin = PARENT_LABEL_BINARIZER.transform(y)
+    y_score_bin = estimator.predict_proba(X)
     return roc_auc_score(y_true_bin, y_score_bin, average='macro')
 
 
