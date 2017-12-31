@@ -54,7 +54,4 @@ if __name__ == "__main__":
                         action='store_false',
                         default=argparse.SUPPRESS)
 
-    try:
-        evaluate(**vars(parser.parse_args()))
-    except ValueError:
-        print("""Unexpected problem!""")
+    evaluate(**vars(parser.parse_args()))
