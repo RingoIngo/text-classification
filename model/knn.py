@@ -11,7 +11,13 @@ def cosine_similarity(x, y):
 
 
 def cosine_semi_metric(x, y):
-    return 1 - np.dot(x, y) / math.sqrt(np.dot(x, x) * np.dot(y, y))
+    # handle zero vectors
+    if (not np.any(x) and np.any(y)) or (not np.any(y) and np.any(x)):
+        return 1
+    if not np.any(x) and not np.any(y):
+        return 0
+    else:
+        return 1 - np.dot(x, y) / math.sqrt(np.dot(x, x) * np.dot(y, y))
 
 
 def cosine_dist_to_sim(dist):
