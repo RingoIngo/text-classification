@@ -269,10 +269,10 @@ def roc_auc(y_true, y_score):
     return roc_auc_score(y_true_bin, y_score_bin, average=None)
 
 
-def roc_auc_micro(y_true, y_score):
+def roc_auc_micro(estimator, X, y):
     """Wrapper function for roc_auc_score with average='micro'"""
-    y_true_bin = PARENT_LABEL_BINARIZER.transform(y_true)
-    y_score_bin = PARENT_LABEL_BINARIZER.transform(y_score)
+    y_true_bin = PARENT_LABEL_BINARIZER.transform(y)
+    y_score_bin = estimator.predict_proba(X)
     return roc_auc_score(y_true_bin, y_score_bin, average='micro')
 
 
@@ -299,13 +299,18 @@ def roc_auc_macro(estimator, X, y):
 #           }
 
 
-SCORES_BIN = {'recall_macro': 'recall_macro',
-              'precision_macro': 'precision_macro',
-              'f1_macro': 'f1_macro',
-              'f1_micro': 'f1_micro',
-              'roc_auc_micro': make_scorer(roc_auc_micro),
-              'roc_auc_macro': make_scorer(roc_auc_macro),
-              # 'roc_auc': make_scorer(roc_auc)
+# SCORES_BIN = {'recall_macro': 'recall_macro',
+#               'precision_macro': 'precision_macro',
+#               'f1_macro': 'f1_macro',
+#               'f1_micro': 'f1_micro',
+#               'roc_auc_micro': make_scorer(roc_auc_micro),
+#               'roc_auc_macro': make_scorer(roc_auc_macro),
+#               # 'roc_auc': make_scorer(roc_auc)
+#               }
+
+
+SCORES_BIN = {'roc_auc_micro': roc_auc_micro,
+              'roc_auc_macro': roc_auc_macro,
               }
 
 
