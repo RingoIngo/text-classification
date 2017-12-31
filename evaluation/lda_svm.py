@@ -16,7 +16,7 @@ import model
 
 # pre_reduction = TruncatedSVD(n_components=500)
 PRE_REDUCTION = SparseRandomProjection(n_components=500)
-CLASSIFIER = OneVsRestClassifier(SVC())
+CLASSIFIER = OneVsRestClassifier(SVC(probability=True))
 
 # grid
 N_COMPONENTS_RANGE = [1, 2, 4, 6, 8, 10, 12, 13]

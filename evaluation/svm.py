@@ -13,7 +13,7 @@ import model
 
 
 reduction = SparseRandomProjection(n_components=500)
-CLASSIFIER = OneVsRestClassifier(SVC())
+CLASSIFIER = OneVsRestClassifier(SVC(probability=True))
 
 # grid
 # kernels = ['linear', 'rbf']
