@@ -18,7 +18,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 # from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import roc_auc_score
-from sklearn.metrics import make_scorer
+# from sklearn.metrics import make_scorer
 from sklearn.preprocessing import LabelBinarizer
 
 import model.text.text_tokenizer_and_cleaner as ttc
@@ -607,7 +607,7 @@ class SMSGuruModel:
                               self.question_loader_.categoryids)
         return self
 
-    def nested_cv(self, param_grid, CV=5, scoring=make_scorer(roc_auc_macro)):
+    def nested_cv(self, param_grid, CV=5, scoring=roc_auc_macro):
         """
         Perform a nested gridsearch to evaluate an estimator with param grid
 
