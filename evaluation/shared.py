@@ -48,7 +48,7 @@ def save_and_report(results, folder, name='grids_cv.npy', report=None):
     # save results
     current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
     path = './results/gridsearch/' + folder + '/'
-    filename = current_time + 'v2_' + name
+    filename = current_time + 'v3_' + name
     np.save(path + filename, results)
 
     if report is not None:
