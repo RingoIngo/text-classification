@@ -28,10 +28,11 @@ N_PARENTCATS = 14
 
 # for SVM RBF
 # see time plot
-C_RANGE = np.logspace(-2, 5, 8)
-GAMMA_RANGE = np.logspace(-7, 0, 8)
+# C_RANGE = np.logspace(-2, 5, 8)
+# GAMMA_RANGE = np.logspace(-7, 0, 8)
 
-
+GAMMA_RANGE = np.logspace(-3, 3, 7)
+C_RANGE = np.logspace(-3, 3, 7)
 
 
 def merge_two_dicts(x, y):
