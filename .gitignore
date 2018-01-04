@@ -3,5 +3,6 @@ __pycache__
 **.eps
 **.ipynb
 **.pyc
+**.job
 ./results/gridsearch/gridsearches.txt
 core

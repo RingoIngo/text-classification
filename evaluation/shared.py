@@ -11,8 +11,6 @@ import numpy as np
 # number of folds used in cross-validation
 CV = 5
 
-# metric used in generalization error estimate
-GEN_ERROR_SCORE = 'f1_micro'
 
 # in milestone it suffices to focus on parent categories
 SUBCATS = False

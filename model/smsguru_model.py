@@ -290,28 +290,13 @@ def roc_auc_macro(estimator, X, y):
     return roc_auc_score(y_true_bin, y_score_bin, average='macro')
 
 
-# SCORES = {'recall_macro': 'recall_macro',
-#           'precision_macro': 'precision_macro',
-#           'f1_macro': 'f1_macro',
-#           'f1_micro': 'f1_micro',
-#           # 'roc_auc_micro': make_scorer(roc_auc_micro),
-#           # 'roc_auc': make_scorer(roc_auc)
-#           }
-
-
-# SCORES_BIN = {'recall_macro': 'recall_macro',
-#               'precision_macro': 'precision_macro',
-#               'f1_macro': 'f1_macro',
-#               'f1_micro': 'f1_micro',
-#               'roc_auc_micro': make_scorer(roc_auc_micro),
-#               'roc_auc_macro': make_scorer(roc_auc_macro),
-#               # 'roc_auc': make_scorer(roc_auc)
-#               }
-
-
-SCORES_BIN = {'roc_auc_micro': roc_auc_micro,
-              'roc_auc_macro': roc_auc_macro,
-              }
+SCORES = {'recall_macro': 'recall_macro',
+          'precision_macro': 'precision_macro',
+          'f1_macro': 'f1_macro',
+          'f1_micro': 'f1_micro',
+          # 'roc_auc_micro': roc_auc_micro,
+          # 'roc_auc_macro':roc_auc_macro,
+          }
 
 
 class SMSGuruModel:
@@ -597,7 +582,7 @@ class SMSGuruModel:
         self.grid_search_ = GridSearchCV(self.model, cv=self.CV_,
                                          param_grid=self.param_grid_,
                                          return_train_score=True,
-                                         scoring=SCORES_BIN,
+                                         scoring=SCORES,
                                          refit=False,
                                          error_score=-1,
                                          n_jobs=self.n_jobs_,
@@ -607,7 +592,7 @@ class SMSGuruModel:
                               self.question_loader_.categoryids)
         return self
 
-    def nested_cv(self, param_grid, CV=5, scoring='f1_macro'):
+    def nested_cv(self, param_grid, CV=3, scoring='f1_macro'):
         """
         Perform a nested gridsearch to evaluate an estimator with param grid
 
