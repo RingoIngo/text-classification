@@ -607,7 +607,7 @@ class SMSGuruModel:
                               self.question_loader_.categoryids)
         return self
 
-    def nested_cv(self, param_grid, CV=5, scoring=roc_auc_macro):
+    def nested_cv(self, param_grid, CV=5, scoring='f1_macro'):
         """
         Perform a nested gridsearch to evaluate an estimator with param grid
 
