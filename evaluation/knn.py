@@ -21,6 +21,8 @@ CLASSIFIER = KNeighborsClassifier(weights=model.knn.cosine_dist_to_sim,
 N_NEIGHBORS_RANGE = np.arange(5, 65, 5)
 
 PARAM_GRID = dict(classifier__n_neighbors=N_NEIGHBORS_RANGE)
+MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None,
+                           metadata=False)
 
 
 def evaluate(gridsearch=True, gen_error=True, memory=True):

@@ -20,6 +20,10 @@ N_NEIGHBORS_RANGE = np.arange(5, 65, 5)
 
 PARAM_GRID = dict(classifier__n_neighbors=N_NEIGHBORS_RANGE)
 
+# model for train_apply_classifier
+MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None,
+                           metadata=False)
+
 
 def evaluate(gridsearch=True, gen_error=True, memory=True):
     # metadata=False since cosine similiarity measure

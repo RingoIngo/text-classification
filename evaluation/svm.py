@@ -28,6 +28,9 @@ GAMMA_RANGE = shared.GAMMA_RANGE
 PARAM_GRID = [dict(classifier__estimator__gamma=GAMMA_RANGE,
                    classifier__estimator__C=C_RANGE)]
 
+# model for use in train_apply_classifier
+MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=reduction)
+
 
 def evaluate(gridsearch=True, gen_error=True, memory=True):
     MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=reduction,

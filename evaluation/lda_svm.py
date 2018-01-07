@@ -38,6 +38,11 @@ PARAM_GRID_DIM = [dict(reduce_dim__n_components=N_COMPONENTS_RANGE,
 PARAM_GRID = [dict(classifier__estimator__gamma=GAMMA_RANGE,
                    classifier__estimator__C=C_RANGE)]
 
+# model for use in train_apply_classifier
+MODEL = model.SMSGuruModel(classifier=CLASSIFIER,
+                           pre_reduction=PRE_REDUCTION,
+                           reduction=LDA())
+
 
 def evaluate(gridsearch=True, gen_error=True, memory=True):
     MODEL = model.SMSGuruModel(classifier=CLASSIFIER,

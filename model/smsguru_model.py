@@ -543,7 +543,13 @@ class SMSGuruModel:
         return self.model.fit_transform(self.question_loader_.questions,
                                         self.question_loader_.categoryids)
 
-    def gridsearch(self, param_grid, verbose=100, CV=5, n_jobs=1):
+    def predict(self, test_data):
+        if not self.is_fitted:
+            print("fit first")
+        return self.model.predict(test_data)
+
+    def gridsearch(self, param_grid, verbose=100, CV=5,
+                   n_jobs=1, scoring=SCORES, refit=False):
         """
         Perform a gridsearch
 
@@ -582,8 +588,8 @@ class SMSGuruModel:
         self.grid_search_ = GridSearchCV(self.model, cv=self.CV_,
                                          param_grid=self.param_grid_,
                                          return_train_score=True,
-                                         scoring=SCORES,
-                                         refit=False,
+                                         scoring=scoring,
+                                         refit=refit,
                                          error_score=-1,
                                          n_jobs=self.n_jobs_,
                                          verbose=verbose)

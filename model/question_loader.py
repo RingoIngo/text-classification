@@ -54,6 +54,7 @@ class QuestionLoader(object):
                  metadata=False,
                  subcats=True,
                  verbose=False):
+        self.test_questions = None
         self.qfile = qfile
         self.catfile = catfile
         self.binarize = binarize
@@ -192,6 +193,43 @@ class QuestionLoader(object):
             pprint.pprint(sorted(category_counts.items(),
                                  key=operator.itemgetter(1), reverse=True))
         return category_counts
+
+    def read_test_data(self, qfile_test, verbose):
+        """reads and stores the questions
+
+        Returns
+        -------
+        questions : list containing the questions
+
+        """
+        with open(qfile_test, 'rU', encoding='utf8') as f:
+            reader = csv.reader(f, quotechar='"', delimiter=',')
+            f_header = next(reader)
+
+            question_idx = f_header.index("question")
+            created_at_idx = f_header.index("created_at")
+
+            questions = []
+            nsyntax_errors = 0
+            for row in reader:
+                try:
+                    question = row[question_idx]
+                    if self.metadata:
+                        created_at = datetime.strptime(row[created_at_idx],
+                                                       "%Y-%m-%d %H:%M:%S")
+                    # the model expects a date key even if not used
+                    else:
+                        created_at = None
+
+                    data = {'question': question, 'created_at': created_at}
+                    questions.append(data)
+                except (ValueError, IndexError):
+                    nsyntax_errors = nsyntax_errors + 1
+                    continue
+        if verbose:
+            print("{} not in {} read because of syntax errors".format(
+                nsyntax_errors, self.qfile))
+        self.test_questions = questions
 
 
 if __name__ == "__main__":
