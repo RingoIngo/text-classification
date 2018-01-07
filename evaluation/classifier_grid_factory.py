@@ -1,5 +1,7 @@
 """
-The :mod: `classifier_grid_factory`
+The :mod: `classifier_grid_factory` translates the string name of the
+classification method into a model and associated parameter grid if
+existing.
 """
 # Author: Ingo Guehring
 
@@ -11,6 +13,23 @@ import evaluation.knn_b as knn_b
 
 
 def make_classifier_grid(classifier):
+    """Return SMSGuruModel with classification method and associated
+    parameter grid.
+
+    Parameters
+    ----------
+
+    classifier : string, name of the classification method that should
+        be used in the model.
+
+    Returns
+    -------
+
+    model : SMSGuruModel with `classifier` as classification method
+
+    param_grid : Associated parameter grid
+    """
+
     if classifier == 'svm-b':
         return lda_svm.MODEL, lda_svm.PARAM_GRID_DIM
     elif classifier == 'svm-a':

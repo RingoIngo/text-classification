@@ -1,3 +1,8 @@
+"""
+The :mod: `knn` implements the some distance metrics for kNN
+and the kNNB classifier"""
+# Author: Ingo Guehring
+
 import collections
 import math
 import numpy as np
@@ -7,10 +12,15 @@ from sklearn.neighbors import KNeighborsClassifier
 
 
 def cosine_similarity(x, y):
+    """Compute cosine similarity"""
     return np.dot(x, y) / math.sqrt(np.dot(x, x) * np.dot(y, y))
 
 
 def cosine_semi_metric(x, y):
+    """" Compute cosine distance
+
+    Note: This is not a proper metric
+    """
     # handle zero vectors
     if (not np.any(x) and np.any(y)) or (not np.any(y) and np.any(x)):
         return 1
@@ -21,14 +31,24 @@ def cosine_semi_metric(x, y):
 
 
 def cosine_dist_to_sim(dist):
+    """Convert cosine distance to similarity"""
     return (dist - 1) * (- 1)
 
 
 def get_top_n(k, N_class, max_N_class):
+    """Compute top_n neighbors"""
     return math.ceil((k * N_class) / max_N_class)
 
 
 class KNeighborsClassifierB(KNeighborsClassifier):
+    """Implements a modified version of the k neares neighbors algorithm
+
+    This version of kNN takes special care of an imbalanced classification
+    problem, i.e. a problem where the class frequencies are imbalanced.
+    This is done by considering a different number of neighbors for classes
+    with different class sizes.
+
+    """
     def __init__(self, n_jobs=1, n_neighbors=5, **kargs):
         super().__init__(n_jobs=n_jobs, n_neighbors=n_neighbors,
                          metric=cosine_semi_metric, **kargs)

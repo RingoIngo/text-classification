@@ -33,6 +33,25 @@ MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=reduction)
 
 
 def evaluate(gridsearch=True, gen_error=True, memory=True):
+    """Evaluate model
+
+    Compute either an estimate for the generalization error for
+    f1_macro with a nested gridsearch or evaluate the parameter
+    grid in a simple gridsearch.
+
+    Parameters
+    -----------
+    gridsearch : boolean, if True the gridsearch is performed
+
+    gen_error : boolean, if True an estimate for the generalization
+        error is computed.
+
+    memory : boolean, if True memory option is used
+
+    Returns
+    ---------
+    NOTHING but SAVES the results of the performed computations
+    """
     MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=reduction,
                                memory=memory)
     MODEL.set_question_loader(subcats=shared.SUBCATS)

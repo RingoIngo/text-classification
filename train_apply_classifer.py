@@ -9,7 +9,11 @@ import numpy as np
 import evaluation
 
 
+# models that have an associated parameter grid that
+# has to be cross-validated for model selection
 GRIDSEARCH_MODELS = ['svm-a', 'svm-b', 'knn', 'knn-b']
+
+# models that do not have an associated grid
 NO_GRIDSEARCH_MODELS = ['lda']
 
 
@@ -23,6 +27,53 @@ def train_apply_classifier(classifier='lda',
                            save_results=False,
                            outfile='prediction.npz',
                            verbose=100):
+    """Train a model and predict unlabeled data
+
+    Extract features from training data in SMSGuru format fit a model,
+    then predict unlabeled data.
+
+    Parameters
+    -----------
+
+    classifier : string, determines the method used for the prediction
+
+    qfile_train : csv file containing the questions and the
+       corresponding categories used as training data. By default the file
+       'question_train.csv' is loaded.
+
+    qfile_test : csv file containing the test data. By default the file
+       'question_test.csv' is loaded.
+
+    qcatfile_train : required, but unused.
+
+    catfile : csv file containing the categoires of the training questions.
+        a category has a category_nam (string), a category_id (int)
+        and a parent_id (int). if the parent_id equals zero the
+        category has no parent.
+
+    CV : int, number of folds used in cross-validation for model selection
+        when fitting the data.
+
+    subcats : boolean, if True, the subcategories are used as labels
+        for the samples. If False, the parent categories are used.
+        Default is False.
+
+    save_results : boolean, if True the predicted labels are saved to
+        file.
+
+    outfile : string, name of the file the output is saved to.
+        should end with 'npz'. Default is 'prediction.npz'.
+
+    verbose : integer, if >0 output about the state of the program
+        and the extracted features is printed to the console.
+        Default is False.
+
+    Returns
+    ---------
+
+    test_labels : numpy array that contains the predicted labels of the
+        test data
+    """
 
     sms_guru_model, param_grid = evaluation.make_classifier_grid(classifier)
     sms_guru_model.set_question_loader(qfile_train, catfile, subcats)

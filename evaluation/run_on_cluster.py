@@ -1,3 +1,7 @@
+"""
+old module not used anymore!
+"""
+
 from functools import reduce
 import smsguru_model as sms
 from sklearn.naive_bayes import MultinomialNB
