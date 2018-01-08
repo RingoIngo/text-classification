@@ -19,7 +19,7 @@ C_RANGE = np.logspace(-5, 5, 11)
 PARAM_GRID = [dict(classifier__C=C_RANGE)]
 
 # model for use in train_apply_classifier
-MODEL = model.SMSGuruModel(classifier=CLASSIFIER)
+MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None)
 
 
 def evaluate(gridsearch=True, gen_error=True, memory=True):

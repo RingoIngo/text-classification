@@ -421,7 +421,7 @@ class SMSGuruModel:
                 transformer_weights=None,
             )),
             ('pre_reduce_dim', pre_reduction),
-            ('to_dense', DenseTransformer()),
+            # ('to_dense', DenseTransformer()),
             ('reduce_dim', reduction),
         ]
 
