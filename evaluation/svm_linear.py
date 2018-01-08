@@ -16,7 +16,7 @@ CLASSIFIER = LinearSVC()
 # C_RANGE = shared.C_RANGE
 C_RANGE = np.logspace(-5, 5, 11)
 
-PARAM_GRID = [dict(classifier__estimator__C=C_RANGE)]
+PARAM_GRID = [dict(classifier__C=C_RANGE)]
 
 # model for use in train_apply_classifier
 MODEL = model.SMSGuruModel(classifier=CLASSIFIER)
