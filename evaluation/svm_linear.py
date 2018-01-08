@@ -42,7 +42,8 @@ def evaluate(gridsearch=True, gen_error=True, memory=True):
     ---------
     NOTHING but SAVES the results of the performed computations
     """
-    MODEL = model.SMSGuruModel(classifier=CLASSIFIER, memory=memory)
+    MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None,
+                               memory=memory)
     MODEL.set_question_loader(subcats=shared.SUBCATS)
     if gridsearch:
         MODEL.gridsearch(param_grid=PARAM_GRID, n_jobs=shared.N_JOBS,
