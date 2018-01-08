@@ -5,6 +5,7 @@ The :mod:`run_on_cluster` module evaluated the different classifiers
 import argparse
 import evaluation.lda_svm as lda_svm
 import evaluation.svm as svm
+import evaluation.svm_linear as svm_linear
 import evaluation.lda as lda
 import evaluation.qda as qda
 import evaluation.knn as knn
@@ -16,11 +17,14 @@ def evaluate(classifier=None, gridsearch=False, gen_error=False, memory=True):
           ', gen_error: {}, memory: {}'.format(
               classifier, gridsearch, gen_error, memory))
 
-    if classifier == 'svm':
+    if classifier == 'svm-a':
         svm.evaluate(gridsearch, gen_error, memory)
 
-    elif classifier == 'lda_svm':
+    elif classifier == 'svm-b':
         lda_svm.evaluate(gridsearch, gen_error, memory)
+
+    elif classifier == 'svm-linear':
+        svm_linear.evaluate(gridsearch, gen_error, memory)
 
     elif classifier == 'knn':
         knn.evaluate(gridsearch, gen_error, memory)
@@ -38,7 +42,7 @@ def evaluate(classifier=None, gridsearch=False, gen_error=False, memory=True):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='evaluate classifier')
     parser.add_argument('-c', '--classifier',
-                        choices=['svm', 'lda_svm', 'knn',
+                        choices=['svm-linear', 'svm-a', 'svm-b', 'knn',
                                  'knn_b', 'lda', 'qda'],
                         default=argparse.SUPPRESS)
 
