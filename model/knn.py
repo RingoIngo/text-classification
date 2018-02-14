@@ -22,12 +22,13 @@ def cosine_semi_metric(x, y):
     Note: This is not a proper metric
     """
     # handle zero vectors
-    if (not np.any(x) and np.any(y)) or (not np.any(y) and np.any(x)):
-        return 1
-    if not np.any(x) and not np.any(y):
-        return 0
-    else:
+    try:
         return 1 - np.dot(x, y) / math.sqrt(np.dot(x, x) * np.dot(y, y))
+    except:
+        if (not np.any(x) and np.any(y)) or (not np.any(y) and np.any(x)):
+            return 1
+        if not np.any(x) and not np.any(y):
+            return 0
 
 
 def cosine_dist_to_sim(dist):
