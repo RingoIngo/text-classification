@@ -16,8 +16,8 @@ import evaluation.shared as shared
 # define classifiers here
 mnb = SMSGuruModel(classifier=MultinomialNB(), reduction=None,
                    metadata=False, memory=True).model
-svm = SMSGuruModel(classifier=LinearSVC(C=0.1), reduction=None)
-lda = SMSGuruModel(classifier=LDA(), reduction=None, memory=True)
+svm = SMSGuruModel(classifier=LinearSVC(C=0.1), reduction=None).model
+lda = SMSGuruModel(classifier=LDA(), reduction=None, memory=True).model
 
 ensemble = VotingClassifier(
     estimators=[('mnb', mnb), ('svm', svm), ('lda', lda)], voting='soft')
