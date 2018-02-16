@@ -10,7 +10,8 @@ import evaluation.shared as shared
 import model
 
 
-MODEL = model.SMSGuruModel(classifier=MultinomialNB(), reduction=None, memory=True)
+MODEL = model.SMSGuruModel(classifier=MultinomialNB(), reduction=None,
+                           metadata=False, memory=True)
 
 PARAM_GRID = dict(classifier__alpha=np.array([1]))
 
