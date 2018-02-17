@@ -31,17 +31,16 @@ catfile = './data/category.csv'
 subcats = False
 cv = 5
 verbose = 100
-
-# ##################### without gridsearch ###############################
 question_loader = ql.QuestionLoader(
     qfile=qfile, catfile=catfile, subcats=subcats, metadata=True, verbose=True)
 
-scores = cross_val_score(
-    ensemble, question_loader.questions, question_loader.categoryids, cv=cv,
-    scoring='f1_macro', n_jobs=-1, verbose=verbose)
-
-shared.save_and_report(
-    results=scores, folder='ensemble', name='gen_error.npy')
+# ##################### without gridsearch ###############################
+# scores = cross_val_score(
+#     ensemble, question_loader.questions, question_loader.categoryids, cv=cv,
+#     scoring='f1_macro', n_jobs=-1, verbose=verbose)
+#
+# shared.save_and_report(
+#     results=scores, folder='ensemble', name='gen_error.npy')
 
 # ##################### with gridsearch ###############################
 # svm param
