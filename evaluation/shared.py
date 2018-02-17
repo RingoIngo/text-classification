@@ -11,6 +11,8 @@ import numpy as np
 # number of folds used in cross-validation
 CV = 5
 
+QFILE = './data/question_train.csv'
+CATFILE = './data/category.csv'
 
 # in milestone it suffices to focus on parent categories
 SUBCATS = False

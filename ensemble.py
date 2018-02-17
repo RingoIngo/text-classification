@@ -9,6 +9,7 @@ from sklearn.svm import LinearSVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, cross_val_score
+from sklearn.calibration import CalibratedClassifierCV
 import numpy as np
 
 from model import SMSGuruModel
@@ -18,10 +19,11 @@ import evaluation.shared as shared
 # define classifiers here
 mnb = SMSGuruModel(classifier=MultinomialNB(), reduction=None,
                    metadata=False, memory=True).model
-svm = SMSGuruModel(classifier=LinearSVC(C=0.1), reduction=None).model
+svm = SMSGuruModel(
+    classifier=CalibratedClassifierCV(LinearSVC(C=0.1)), reduction=None).model
 lda = SMSGuruModel(classifier=LDA(), reduction=None, memory=True).model
 logreg = SMSGuruModel(
-    classifier=LogisticRegression(C=0.1), reduction=None).model
+    classifier=LogisticRegression(C=10), reduction=None).model
 
 ensemble = VotingClassifier(
     estimators=[('mnb', mnb), ('logreg', logreg), ('lda', lda)], voting='soft')
