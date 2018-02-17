@@ -6,6 +6,13 @@ helper functions for performing and saving the gridsearch results
 
 from time import gmtime, strftime
 import numpy as np
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import LinearSVC
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.linear_model import LogisticRegression
+from sklearn.calibration import CalibratedClassifierCV
+
+from model import SMSGuruModel
 
 
 # number of folds used in cross-validation
@@ -33,6 +40,15 @@ N_PARENTCATS = 14
 
 GAMMA_RANGE = np.logspace(-3, 3, 7)
 C_RANGE = np.logspace(-3, 3, 7)
+
+# define classifiers here
+MNB = SMSGuruModel(classifier=MultinomialNB(), reduction=None,
+                   metadata=False, memory=True).model
+SVM = SMSGuruModel(
+    classifier=CalibratedClassifierCV(LinearSVC(C=0.1)), reduction=None).model
+LDA = SMSGuruModel(classifier=LDA(), reduction=None, memory=True).model
+LOGREG = SMSGuruModel(
+    classifier=LogisticRegression(C=10), reduction=None).model
 
 
 def merge_two_dicts(x, y):

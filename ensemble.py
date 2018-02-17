@@ -4,37 +4,24 @@ The :mod: `ensemble` combines multiple classifiers in a voting schema
 # Author: Ingo Guehring
 
 from sklearn.ensemble import VotingClassifier
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.svm import LinearSVC
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, cross_val_score
-from sklearn.calibration import CalibratedClassifierCV
 import numpy as np
 
-from model import SMSGuruModel
 import model.question_loader as ql
 import evaluation.shared as shared
 
-# define classifiers here
-mnb = SMSGuruModel(classifier=MultinomialNB(), reduction=None,
-                   metadata=False, memory=True).model
-svm = SMSGuruModel(
-    classifier=CalibratedClassifierCV(LinearSVC(C=0.1)), reduction=None).model
-lda = SMSGuruModel(classifier=LDA(), reduction=None, memory=True).model
-logreg = SMSGuruModel(
-    classifier=LogisticRegression(C=10), reduction=None).model
 
 ensemble = VotingClassifier(
-    estimators=[('mnb', mnb), ('logreg', logreg), ('lda', lda)], voting='soft')
+    estimators=[('mnb', shared.MNB),
+                ('logreg', shared.LOGREG),
+                ('lda', shared.LDA)], voting='soft')
 
-qfile = './data/question_train.csv'
-catfile = './data/category.csv'
 subcats = False
 cv = 5
 verbose = 100
 question_loader = ql.QuestionLoader(
-    qfile=qfile, catfile=catfile, subcats=subcats, metadata=True, verbose=True)
+    qfile=shared.QFILE, catfile=shared.CATFILE, subcats=subcats,
+    metadata=True, verbose=True)
 
 # ##################### without gridsearch ###############################
 # scores = cross_val_score(
