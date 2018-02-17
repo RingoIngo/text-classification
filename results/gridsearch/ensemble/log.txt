@@ -1,0 +1,2 @@
+"./results/gridsearch/ensemble/2018-02-16_23:12:49f1_macro_gen_error.npy": logreg(C=1), mnb, lda; no grid;5-fold cross-validation, not nested
+"./results/gridsearch/ensemble/2018-02-17_00:31:55f1_macro_grids_cv.npy": logreg(C=linsvm_C_range),mnb, lda;5-fold cross-validation, not nested
