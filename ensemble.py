@@ -1,16 +1,16 @@
 """ The :mod: `ensemble` combines multiple classifiers in a voting schema """
 # Author: Ingo Guehring
 
-from sklearn.ensemble import VotingClassifier
+# from sklearn.ensemble import VotingClassifier
 from sklearn.model_selection import cross_val_score
 import numpy as np
 
 import model.question_loader as ql
-from model.ensemble import GridSearchCVB
+from model.ensemble import GridSearchCVB, VotingClassifierB
 import evaluation.shared as shared
 
 # If a classifier is changed the grid might have to be changed, too
-ensemble = VotingClassifier(
+ensemble = VotingClassifierB(
     estimators=[('mnb', shared.MNB),
                 ('svm', shared.SVM),
                 ('lda', shared.LDA)], voting='soft')
@@ -45,7 +45,6 @@ PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE}
 # print(grid.cv_results_)
 # shared.save_and_report(results=grid.cv_results_, folder='ensemble')
 
-print(ensemble.get_params().keys())
 clf = GridSearchCVB(estimator=ensemble, param_grid=PARAM_GRID, cv=cv,
                     n_jobs=-1, scoring='f1_macro', verbose=verbose)
 nested_cv_scores = cross_val_score(
