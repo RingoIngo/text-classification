@@ -25,14 +25,14 @@ for train_index, test_index in skf.split(questions, categoryids):
     # predict_proba for all classfifiers with best param config
     probas = [clf.predict_proba(q_test) for clf in clfs]
 
-    # micro-averaged cov
+    # micro-averaged corrcoef
     probas_micro = np.asarray([prob.reshape(-1) for prob in probas])
-    corr_micro.append(np.cov(probas_micro))
+    corr_micro.append(np.corrcoef(probas_micro))
 
-    # macro-averaged cov
+    # macro-averaged corrcoef
     probas_macro = np.asarray(probas)
-    corr_macro_class = [np.cov(probs) for probs in np.rollaxis(probas_macro,
-                                                               2)]
+    corr_macro_class = [
+        np.corrcoef(probs) for probs in np.rollaxis(probas_macro, 2)]
     corr_macro.append(np.mean(np.asarray(corr_macro_class), 0))
 
 corr_micro = np.mean(np.asarray(corr_micro), axis=0)
