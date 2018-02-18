@@ -14,15 +14,15 @@ from scipy.stats import rankdata
 
 from sklearn.ensemble import VotingClassifier
 from sklearn.utils.validation import check_is_fitted
-from sklearn.model_selection import BaseSearchCV, _check_param_grid,\
-        ParameterGrid
+from sklearn.model_selection import ParameterGrid
+from sklearn.model_selection._search import BaseSearchCV, _check_param_grid
 from sklearn.base import is_classifier, clone
 from sklearn.utils.validation import indexable
-from ._split import check_cv
-from ._validation import _fit_and_score
-from ._validation import _aggregate_score_dicts
-from ..externals.joblib import Parallel, delayed
-from ..externals import six
+from sklearn.model_selection._split import check_cv
+from sklearn.model_selection._validation import _fit_and_score,\
+       _aggregate_score_dicts
+from sklearn.externals.joblib import Parallel, delayed
+from sklearn.externals import six
 from sklearn.utils.fixes import MaskedArray
 from sklearn.utils.deprecation import DeprecationDict
 from sklearn.metrics.scorer import _check_multimetric_scoring
@@ -251,7 +251,7 @@ class GridSearchCVB(BaseSearchCVB):
                  n_jobs=1, iid=True, refit=True, cv=None, verbose=0,
                  pre_dispatch='2*n_jobs', error_score='raise',
                  return_train_score="warn"):
-        super(GridSearchCV, self).__init__(
+        super(GridSearchCVB, self).__init__(
             estimator=estimator, scoring=scoring, fit_params=fit_params,
             n_jobs=n_jobs, iid=iid, refit=refit, cv=cv, verbose=verbose,
             pre_dispatch=pre_dispatch, error_score=error_score,

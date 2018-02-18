@@ -35,7 +35,7 @@ question_loader = ql.QuestionLoader(
 C_RANGE = np.logspace(-5, 5, 11)
 
 # grid
-PARAM_GRID = {'svm__classifier__C': C_RANGE}
+PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE}
 
 # grid = GridSearchCV(
 #     estimator=ensemble, cv=cv, param_grid=PARAM_GRID, scoring='f1_macro',
@@ -45,7 +45,7 @@ PARAM_GRID = {'svm__classifier__C': C_RANGE}
 # print(grid.cv_results_)
 # shared.save_and_report(results=grid.cv_results_, folder='ensemble')
 
-
+print(ensemble.get_params().keys())
 clf = GridSearchCVB(estimator=ensemble, param_grid=PARAM_GRID, cv=cv,
                     n_jobs=-1, scoring='f1_macro', verbose=verbose)
 nested_cv_scores = cross_val_score(
