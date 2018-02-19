@@ -9,6 +9,7 @@ import warnings
 from functools import partial
 from itertools import product
 from collections import defaultdict
+import os
 
 from scipy.stats import rankdata
 
@@ -32,10 +33,13 @@ class VotingClassifierB(VotingClassifier):
     """
     """
     def __init__(self, estimators, voting='hard', weights=None, n_jobs=1,
-                 flatten_transform=None, save_avg=False):
-        super().__init__(estimators, voting='hard', weights=None, n_jobs=1,
-                         flatten_transform=None)
+                 flatten_transform=None, save_avg=False,
+                 save_avg_path='./results/gridsearch/ensemble/raw/'):
+        super().__init__(estimators, voting=voting, weights=weights,
+                         n_jobs=n_jobs,
+                         flatten_transform=flatten_transform)
         self.save_avg = save_avg
+        self.save_avg_path = save_avg_path
 
     def _predict_proba(self, X):
         """Predict class probabilities for X in 'soft' voting """
@@ -47,10 +51,17 @@ class VotingClassifierB(VotingClassifier):
                          weights=self._weights_not_none)
         if self.save_avg:
             current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
-            path = './results/gridsearch/ensemble/raw/'
-            filename = current_time + 'avg'
-            np.savez(path + filename, avg=avg, classes=self.le_.classes_)
-            return avg
+            filename = self.save_avg_path + current_time + 'avg'
+            savename = filename
+            suffix = 1
+            while os.path.exists(savename + '.npz'):
+                savename = filename + '-' + str(suffix)
+                suffix = suffix + 1
+            print('save avg to file: ' + savename)
+            np.savez(
+                savename, avg=avg,
+                classes=self.le_.classes_)
+        return avg
 
 
 class BaseSearchCVB(BaseSearchCV):
@@ -228,8 +239,9 @@ class BaseSearchCVB(BaseSearchCV):
                 self.best_index_]
 
         if self.refit:
+            self.best_params_['save_avg'] = True
             self.best_estimator_ = clone(base_estimator).set_params(
-                save_avg=True, **self.best_params_)
+                **self.best_params_)
             if y is not None:
                 self.best_estimator_.fit(X, y, **fit_params)
             else:

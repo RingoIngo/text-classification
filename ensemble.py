@@ -13,7 +13,7 @@ import evaluation.shared as shared
 ensemble = VotingClassifierB(
     estimators=[('mnb', shared.MNB),
                 ('svm', shared.SVM),
-                ('lda', shared.LDA)], voting='soft')
+                ('lda', shared.LDA)], voting='soft', n_jobs=-1)
 
 subcats = False
 cv = 5
