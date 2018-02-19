@@ -9,6 +9,7 @@ import warnings
 from functools import partial
 from itertools import product
 from collections import defaultdict
+from functools import reduce
 import os
 
 from scipy.stats import rankdata
@@ -31,15 +32,32 @@ from sklearn.metrics.scorer import _check_multimetric_scoring
 
 class VotingClassifierB(VotingClassifier):
     """
+    Parameters
+    -------------
+    comb_method : str, {'avg', 'mult'} (default='avg')
+        If 'avg' (weighted) averaging is used to combine the output
+        of the classifiers. If 'mult' combination is done with the
+        multiplying rule in 'Combining multiple classi"ers by averaging or by
+        multiplying?' by M.Tax et al.
     """
     def __init__(self, estimators, voting='hard', weights=None, n_jobs=1,
                  flatten_transform=None, save_avg=False,
-                 save_avg_path='./results/gridsearch/ensemble/raw/'):
+                 save_avg_path='./results/gridsearch/ensemble/raw/',
+                 comb_method='avg'):
         super().__init__(estimators, voting=voting, weights=weights,
                          n_jobs=n_jobs,
                          flatten_transform=flatten_transform)
         self.save_avg = save_avg
         self.save_avg_path = save_avg_path
+        self.comb_method = comb_method
+
+    def fit(self, X, y, sample_weight=None):
+        super().fit(X, y, sample_weight=sample_weight)
+        if self.comb_method == 'mult':
+            transform_y = self.le_.transform(y)
+            classes = np.arange(len(self.classes_))
+            self.priors = np.asarray(
+                [np.sum(transform_y == i)/len(transform_y) for i in classes])
 
     def _predict_proba(self, X):
         """Predict class probabilities for X in 'soft' voting """
@@ -47,8 +65,17 @@ class VotingClassifierB(VotingClassifier):
             raise AttributeError("predict_proba is not available when"
                                  " voting=%r" % self.voting)
         check_is_fitted(self, 'estimators_')
-        avg = np.average(self._collect_probas(X), axis=0,
-                         weights=self._weights_not_none)
+        if self.comb_method == 'avg':
+            avg = np.average(self._collect_probas(X), axis=0,
+                             weights=self._weights_not_none)
+
+        if self.comb_method == 'mult':
+            R = len(self.estimators)
+            avg = reduce(lambda X, Y: X*Y,
+                         self._collect_probas(X))*(self.priors**(R - 1))
+            # normalize
+            avg = (avg.T/(np.sum(avg, axis=1)).T).T
+
         if self.save_avg:
             current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
             filename = self.save_avg_path + current_time + 'avg'
