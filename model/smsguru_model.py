@@ -364,7 +364,7 @@ class SMSGuruModel:
 
     def __init__(self, classifier=MultinomialNB(),
                  pre_reduction=None,
-                 reduction=SelectKBest(chi2, k=500),
+                 reduction=None,
                  metadata=True,
                  memory=False,
                  to_dense=False,
