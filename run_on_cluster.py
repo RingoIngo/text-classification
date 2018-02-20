@@ -12,6 +12,7 @@ import evaluation.knn as knn
 import evaluation.knn_b as knn_b
 import evaluation.multinb as mnb
 import evaluation.logreg as logreg
+import evaluation.rf as rf
 
 
 def evaluate(classifier=None, gridsearch=False, gen_error=False, memory=True):
@@ -46,12 +47,15 @@ def evaluate(classifier=None, gridsearch=False, gen_error=False, memory=True):
     elif classifier == 'logreg':
         logreg.evaluate(gridsearch, gen_error)
 
+    elif classifier == 'rf':
+        rf.evaluate(gridsearch, gen_error)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='evaluate classifier')
     parser.add_argument('-c', '--classifier',
                         choices=['svm-linear', 'svm-a', 'svm-b', 'knn',
-                                 'knn_b', 'lda', 'qda', 'mnb', 'logreg'],
+                                 'knn_b', 'lda', 'qda', 'mnb', 'logreg', 'rf'],
                         default=argparse.SUPPRESS)
 
     parser.add_argument('-gs', '--gridsearch', dest='gridsearch',
