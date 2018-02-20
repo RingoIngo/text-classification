@@ -28,6 +28,21 @@ from sklearn.externals import six
 from sklearn.utils.fixes import MaskedArray
 from sklearn.utils.deprecation import DeprecationDict
 from sklearn.metrics.scorer import _check_multimetric_scoring
+from sklearn.metrics import f1_score
+
+
+def f1_macroB(estimator, X, y):
+    """Wrapper function for f1 score that passes y down
+
+    This scorer can only be used with an estimator that
+    implements the 'set_y_true()' function. So far
+    this is GridSearchCVB, where the underlying estimator
+    is VotingClassifierB. y_true is passed down so that
+    it can be saved together with the calculated probs.
+    """
+    estimator.set_y_true(y)
+    y_pred = estimator.predict(X)
+    return f1_score(y, y_pred, 'macro')
 
 
 class VotingClassifierB(VotingClassifier):
@@ -39,6 +54,7 @@ class VotingClassifierB(VotingClassifier):
         of the classifiers. If 'mult' combination is done with the
         multiplying rule in 'Combining multiple classi"ers by averaging or by
         multiplying?' by M.Tax et al.
+
     """
     def __init__(self, estimators, voting='hard', weights=None, n_jobs=1,
                  flatten_transform=None, save_avg=False,
@@ -50,8 +66,22 @@ class VotingClassifierB(VotingClassifier):
         self.save_avg = save_avg
         self.save_avg_path = save_avg_path
         self.comb_method = comb_method
+        self.y_true = None
+
+    def set_y_true(self, y_true):
+        """Set the true labels for the samples that have to be
+        predicted. This is done so that the true labels can be saved
+        together with the computed probs.
+        """
+        self.y_true = y_true
 
     def fit(self, X, y, sample_weight=None):
+        """Estimate the class prior probabilities
+
+        When the computed probabilities from the differenct
+        classifiers are combined via multiplication the class
+        priors are needed.
+        """
         super().fit(X, y, sample_weight=sample_weight)
         if self.comb_method == 'mult':
             transform_y = self.le_.transform(y)
@@ -60,22 +90,45 @@ class VotingClassifierB(VotingClassifier):
                 [np.sum(transform_y == i)/len(transform_y) for i in classes])
 
     def _predict_proba(self, X):
-        """Predict class probabilities for X in 'soft' voting """
+        """Predict class probabilities for X in 'soft' voting and save probs
+
+        If comb_method='avg' then the combined probabilites are computed with
+        the original average method. If comb_method='mult' the combined
+        probabilities are computed with a multiplication method described in
+        a paper by Tax et. al..
+        If self.save_avg then the computed combined probabilities and the
+        true labels are saved, together with the probabilities of the first
+        estimator in self.esttimators_. This should be the estimator where the
+        best (single) performance is expected und can be used to analyse the
+        gain from the ensemble method.
+        Note that it makes no sense to compute both combination methods at
+        the same time, since in the previous gridsearch the parameters where
+        optimized with respect to one method only. So get the probabilities
+        for both methods the whole nested cross-validation has to be run
+        two times.
+        """
         if self.voting == 'hard':
             raise AttributeError("predict_proba is not available when"
                                  " voting=%r" % self.voting)
         check_is_fitted(self, 'estimators_')
-        if self.comb_method == 'avg':
-            avg = np.average(self._collect_probas(X), axis=0,
-                             weights=self._weights_not_none)
+        collected_probas = self._collect_probas(X)
 
+        # combine probabilities with averaging
+        if self.comb_method == 'avg':
+            combined_probs = np.average(collected_probas, axis=0,
+                                        weights=self._weights_not_none)
+
+        # combine probabilities with multiplication method
         if self.comb_method == 'mult':
             R = len(self.estimators)
-            avg = reduce(lambda X, Y: X*Y,
-                         self._collect_probas(X))*(self.priors**(R - 1))
+            combined_probs = reduce(lambda X, Y: X*Y,
+                                    collected_probas)*(self.priors**(R - 1))
             # normalize
-            avg = (avg.T/(np.sum(avg, axis=1)).T).T
+            combined_probs = (
+                combined_probs.T/(np.sum(combined_probs, axis=1)).T).T
 
+        # save combined probabilities, probabilities of first (best) single
+        # estimator, true class labels and labels.
         if self.save_avg:
             current_time = strftime("%Y-%m-%d_%H:%M:%S", gmtime())
             filename = self.save_avg_path + current_time + 'avg'
@@ -86,9 +139,10 @@ class VotingClassifierB(VotingClassifier):
                 suffix = suffix + 1
             print('save avg to file: ' + savename)
             np.savez(
-                savename, avg=avg,
+                savename, probs=combined_probs,
+                best_single=collected_probas[0, :, :], y_true=self.y_true,
                 classes=self.le_.classes_)
-        return avg
+        return combined_probs
 
 
 class BaseSearchCVB(BaseSearchCV):
@@ -285,6 +339,8 @@ class BaseSearchCVB(BaseSearchCV):
 
 class GridSearchCVB(BaseSearchCVB):
     """
+    - set save_avg in refitted best estimator
+    - pass y_true down to the underlying estmator
     """
     def __init__(self, estimator, param_grid, scoring=None, fit_params=None,
                  n_jobs=1, iid=True, refit=True, cv=None, verbose=0,
@@ -297,6 +353,14 @@ class GridSearchCVB(BaseSearchCVB):
             return_train_score=return_train_score)
         self.param_grid = param_grid
         _check_param_grid(param_grid)
+
+    def set_y_true(self, y_true):
+        """Set the true class labels of the samples that have to be predicted
+
+        This works only if the underlying estimator supports 'set_y_true()'.
+        So far this only for VotingClassifierB the case.
+        """
+        self.best_estimator_.set_y_true(y_true)
 
     def _get_param_iterator(self):
         """Return ParameterGrid instance for the given param_grid"""

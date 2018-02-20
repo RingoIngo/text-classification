@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.model_selection import cross_val_score
 
 import model.question_loader as ql
-from model.ensemble import GridSearchCVB, VotingClassifierB
+from model.ensemble import GridSearchCVB, VotingClassifierB, f1_macroB
 import evaluation.shared as shared
 
 
@@ -24,9 +24,11 @@ def evaluate(subcats=False, comb_method='avg',
         os.makedirs(save_avg_path)
 
     # If a classifier is changed the grid might have to be changed, too
+    # Put the estimator with the best expected perfromance at the first
+    # position! Then its probability output will be saved!
     ensemble = VotingClassifierB(
-        estimators=[('mnb', shared.MNB),
-                    ('svm', shared.SVM),
+        estimators=[('svm', shared.SVM),
+                    ('mnb', shared.MNB),
                     ('lda', shared.LDA)], voting='soft',
         comb_method=comb_method, save_avg_path=save_avg_path)
 
@@ -64,7 +66,7 @@ def evaluate(subcats=False, comb_method='avg',
                         n_jobs=-1, scoring='f1_macro', verbose=verbose)
     nested_cv_scores = cross_val_score(
         clf, X=question_loader.questions, y=question_loader.categoryids, cv=cv,
-        scoring='f1_macro', verbose=verbose)
+        scoring=f1_macroB, verbose=verbose)
     shared.save_and_report(
         results=nested_cv_scores, folder='ensemble', name='gen_error.npy')
 
