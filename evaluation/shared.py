@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.calibration import CalibratedClassifierCV
 
@@ -49,6 +50,8 @@ SVM = SMSGuruModel(
 LDA = SMSGuruModel(classifier=LDA(), reduction=None, memory=True).model
 LOGREG = SMSGuruModel(
     classifier=LogisticRegression(C=10), reduction=None).model
+RF = SMSGuruModel(classifier=RandomForestClassifier(n_estimators=500),
+                  metadata=False, reduction=None).model
 
 
 def merge_two_dicts(x, y):

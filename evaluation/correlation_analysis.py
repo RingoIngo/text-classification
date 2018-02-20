@@ -4,7 +4,7 @@ import numpy as np
 import model.question_loader as ql
 import evaluation.shared as shared
 
-clfs = [shared.SVM, shared.LOGREG, shared.LDA, shared.MNB]
+clfs = [shared.SVM, shared.LOGREG, shared.LDA, shared.MNB, shared.RF]
 question_loader = ql.QuestionLoader(
     qfile=shared.QFILE, catfile=shared.CATFILE, subcats=shared.SUBCATS,
     metadata=True, verbose=True)
