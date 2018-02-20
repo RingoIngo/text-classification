@@ -17,7 +17,7 @@ MAX_FEATURES_RANGE = [.2, .4, .6, .8, 'log2', 'sqrt']
 PARAM_GRID = [dict(classifier__max_features=MAX_FEATURES_RANGE)]
 
 # model for use in train_apply_classifier
-MODEL = model.SMSGuruModel(classifier=CLASSIFIER)
+MODEL = model.SMSGuruModel(classifier=CLASSIFIER, metadata=False)
 
 
 def evaluate(gridsearch=True, gen_error=True, memory=True):
@@ -40,7 +40,8 @@ def evaluate(gridsearch=True, gen_error=True, memory=True):
     ---------
     NOTHING but SAVES the results of the performed computations
     """
-    MODEL = model.SMSGuruModel(classifier=CLASSIFIER, memory=memory)
+    MODEL = model.SMSGuruModel(classifier=CLASSIFIER, memory=memory,
+                               metadata=False)
     MODEL.set_question_loader(subcats=shared.SUBCATS)
     if gridsearch:
         MODEL.gridsearch(param_grid=PARAM_GRID, n_jobs=shared.N_JOBS,
