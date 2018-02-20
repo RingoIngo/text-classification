@@ -68,7 +68,8 @@ def evaluate(subcats=False, comb_method='avg',
         clf, X=question_loader.questions, y=question_loader.categoryids, cv=cv,
         scoring=f1_macroB, verbose=verbose)
     shared.save_and_report(
-        results=nested_cv_scores, folder='ensemble', name='gen_error.npy')
+        results=nested_cv_scores, folder='ensemble',
+        name=comb_method + 'gen_error.npy')
 
 
 if __name__ == "__main__":
