@@ -7,10 +7,10 @@ import os
 import numpy as np
 
 from sklearn.model_selection import cross_val_score
+from sklearn.ensemble import BaggingClassifier
 
 import model.question_loader as ql
-from model.ensemble import GridSearchCVB, VotingClassifierB, f1_macroB,\
-        BaggingClassifier
+from model.ensemble import GridSearchCVB, VotingClassifierB, f1_macroB
 import evaluation.shared as shared
 
 
