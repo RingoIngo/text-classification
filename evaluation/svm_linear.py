@@ -5,12 +5,16 @@ for the evalutation of SVM as classifier with a linear kernel"""
 
 import numpy as np
 from sklearn.svm import LinearSVC
+from sklearn.ensemble import BaggingClassifier
+from sklearn.model_selection import cross_val_score
 
+import model.question_loader as ql
 import evaluation.shared as shared
 import model
 
 
-CLASSIFIER = LinearSVC()
+# CLASSIFIER = LinearSVC()
+CLASSIFIER = BaggingClassifier(LinearSVC(C=0.1))
 
 # new wider range
 # C_RANGE = shared.C_RANGE
@@ -53,7 +57,14 @@ def evaluate(gridsearch=True, gen_error=True, memory=True):
             folder='svm_linear')
 
     if gen_error:
-        nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV)
+        question_loader = ql.QuestionLoader(
+            qfile=shared.QFILE, catfile=shared.CATFILE, subcats=False,
+            metadata=True, verbose=True)
+        nested_scores = cross_val_score(
+            CLASSIFIER, X=question_loader.questions,
+            y=question_loader.categoryids, cv=5,
+            scoring='f1_macro', verbose=100)
+        # nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV)
         shared.save_and_report(results=nested_scores,
                                folder='svm_linear',
-                               name='gen_error.npy')
+                               name='gen_error_bagging.npy')
