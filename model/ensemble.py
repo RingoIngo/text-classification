@@ -42,7 +42,7 @@ def f1_macroB(estimator, X, y):
     """
     estimator.set_y_true(y)
     y_pred = estimator.predict(X)
-    return f1_score(y, y_pred, 'macro')
+    return f1_score(y, y_pred, average='macro')
 
 
 class VotingClassifierB(VotingClassifier):
