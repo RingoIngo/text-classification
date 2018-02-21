@@ -61,7 +61,7 @@ def evaluate(gridsearch=True, gen_error=True, memory=True):
             qfile=shared.QFILE, catfile=shared.CATFILE, subcats=False,
             metadata=True, verbose=True)
         nested_scores = cross_val_score(
-            CLASSIFIER, X=question_loader.questions,
+            MODEL.model, X=question_loader.questions,
             y=question_loader.categoryids, cv=5,
             scoring='f1_macro', verbose=100)
         # nested_scores = MODEL.nested_cv(param_grid=PARAM_GRID, CV=shared.CV)
