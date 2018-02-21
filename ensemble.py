@@ -9,7 +9,8 @@ import numpy as np
 from sklearn.model_selection import cross_val_score
 
 import model.question_loader as ql
-from model.ensemble import GridSearchCVB, VotingClassifierB, f1_macroB
+from model.ensemble import GridSearchCVB, VotingClassifierB, f1_macroB,\
+        BaggingClassifier
 import evaluation.shared as shared
 
 
@@ -23,47 +24,52 @@ def evaluate(subcats=False, comb_method='avg',
         print('create directory: {}'.format(save_avg_path))
         os.makedirs(save_avg_path)
 
-    # If a classifier is changed the grid might have to be changed, too
-    # Put the estimator with the best expected perfromance at the first
-    # position! Then its probability output will be saved!
-    ensemble = VotingClassifierB(
-        estimators=[('svm', shared.SVM),
-                    ('mnb', shared.MNB),
-                    ('lda', shared.LDA)], voting='soft',
-        comb_method=comb_method, save_avg_path=save_avg_path)
+    if comb_method is not 'bagging':
+        # If a classifier is changed the grid might have to be changed, too
+        # Put the estimator with the best expected perfromance at the first
+        # position! Then its probability output will be saved!
+        ensemble = VotingClassifierB(
+            estimators=[('svm', shared.SVM),
+                        ('mnb', shared.MNB),
+                        ('lda', shared.LDA)], voting='soft',
+            comb_method=comb_method, save_avg_path=save_avg_path)
 
-    cv = 5
-    verbose = 100
-    question_loader = ql.QuestionLoader(
-        qfile=shared.QFILE, catfile=shared.CATFILE, subcats=subcats,
-        metadata=True, verbose=True)
+        cv = 5
+        verbose = 100
+        question_loader = ql.QuestionLoader(
+            qfile=shared.QFILE, catfile=shared.CATFILE, subcats=subcats,
+            metadata=True, verbose=True)
 
-    # ##################### without gridsearch ###############################
-    # scores = cross_val_score(
-    #     ensemble, question_loader.questions,
-    # question_loader.categoryids, cv=cv,
-    #     scoring='f1_macro', n_jobs=-1, verbose=verbose)
-    #
-    # shared.save_and_report(
-    #     results=scores, folder='ensemble', name='gen_error.npy')
+        # ##################### without gridsearch ############################
+        # scores = cross_val_score(
+        #     ensemble, question_loader.questions,
+        # question_loader.categoryids, cv=cv,
+        #     scoring='f1_macro', n_jobs=-1, verbose=verbose)
+        #
+        # shared.save_and_report(
+        #     results=scores, folder='ensemble', name='gen_error.npy')
 
-    # ##################### with gridsearch ###############################
-    # svm param
-    C_RANGE = np.logspace(-5, 5, 11)
+        # ##################### with gridsearch ###############################
+        # svm param
+        C_RANGE = np.logspace(-5, 5, 11)
 
-    # grid
-    PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE}
+        # grid
+        PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE}
 
-    # grid = GridSearchCV(
-    #     estimator=ensemble, cv=cv, param_grid=PARAM_GRID, scoring='f1_macro',
-    #     refit=False, error_score=-1, n_jobs=-1, verbose=verbose)
-    #
-    # grid.fit(question_loader.questions, question_loader.categoryids)
-    # print(grid.cv_results_)
-    # shared.save_and_report(results=grid.cv_results_, folder='ensemble')
+        # grid = GridSearchCV(
+        #     estimator=ensemble, cv=cv, param_grid=PARAM_GRID,
+        #     refit=False, error_score=-1, n_jobs=-1, verbose=verbose)
+        #
+        # grid.fit(question_loader.questions, question_loader.categoryids)
+        # print(grid.cv_results_)
+        # shared.save_and_report(results=grid.cv_results_, folder='ensemble')
 
-    clf = GridSearchCVB(estimator=ensemble, param_grid=PARAM_GRID, cv=cv,
-                        n_jobs=-1, scoring='f1_macro', verbose=verbose)
+        clf = GridSearchCVB(estimator=ensemble, param_grid=PARAM_GRID, cv=cv,
+                            n_jobs=-1, scoring='f1_macro', verbose=verbose)
+
+    if comb_method is 'bagging':
+        clf = BaggingClassifier(shared.SVM, n_estimators=50, max_sampels=1.0)
+
     nested_cv_scores = cross_val_score(
         clf, X=question_loader.questions, y=question_loader.categoryids, cv=cv,
         scoring=f1_macroB, verbose=verbose)
@@ -75,7 +81,7 @@ def evaluate(subcats=False, comb_method='avg',
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='evaluate ensemble')
     parser.add_argument('-cm', '--comb_method',
-                        choices=['avg', 'mult'],
+                        choices=['avg', 'mult', 'bagging'],
                         default=argparse.SUPPRESS)
 
     parser.add_argument('-sc', '--subcats', dest='subcats',

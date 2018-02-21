@@ -5,14 +5,13 @@ for the evalutation of SVM as classifier with a linear kernel"""
 
 import numpy as np
 from sklearn.svm import LinearSVC
-from sklearn.ensemble import BaggingClassifier
 
 import evaluation.shared as shared
 import model
 
 
-# CLASSIFIER = LinearSVC()
-CLASSIFIER = BaggingClassifier(LinearSVC(), n_estimators=5, max_samples=0.5)
+CLASSIFIER = LinearSVC()
+# CLASSIFIER = BaggingClassifier(LinearSVC(), n_estimators=5, max_samples=0.5)
 
 # new wider range
 # C_RANGE = shared.C_RANGE
