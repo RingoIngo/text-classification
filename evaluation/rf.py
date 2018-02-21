@@ -4,15 +4,19 @@ for the evalutation of the random forest classifier"""
 # Author: Ingo Guehring
 
 # import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+# from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 
 import evaluation.shared as shared
 import model
 
 
-CLASSIFIER = RandomForestClassifier(n_estimators=500)
+# CLASSIFIER = RandomForestClassifier(n_estimators=500)
+CLASSIFIER = GradientBoostingClassifier(n_estimators=500)
 
-MAX_FEATURES_RANGE = [.2, .4, .6, .8, 'log2', 'sqrt']
+# MAX_FEATURES_RANGE = [.2, .4, .6, .8, 'log2', 'sqrt']
+MAX_FEATURES_RANGE = ['log2']
+
 
 PARAM_GRID = [dict(classifier__max_features=MAX_FEATURES_RANGE)]
 
