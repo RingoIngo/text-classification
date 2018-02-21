@@ -12,7 +12,7 @@ import model
 
 
 # CLASSIFIER = LinearSVC()
-CLASSIFIER = BaggingClassifier(LinearSVC(), n_estimators=5)
+CLASSIFIER = BaggingClassifier(LinearSVC(), n_estimators=5, max_samples=0.5)
 
 # new wider range
 # C_RANGE = shared.C_RANGE
