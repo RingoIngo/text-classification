@@ -6,6 +6,7 @@ import argparse
 import os
 import numpy as np
 
+from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import BaggingClassifier
 
@@ -24,7 +25,15 @@ def evaluate(subcats=False, comb_method='avg',
         print('create directory: {}'.format(save_avg_path))
         os.makedirs(save_avg_path)
 
-    if comb_method is not 'bagging':
+    question_loader = ql.QuestionLoader(
+        qfile=shared.QFILE, catfile=shared.CATFILE, subcats=subcats,
+        metadata=True, verbose=True)
+
+    cv = 5
+    verbose = 100
+
+    if comb_method != 'bagging':
+        print(comb_method)
         # If a classifier is changed the grid might have to be changed, too
         # Put the estimator with the best expected perfromance at the first
         # position! Then its probability output will be saved!
@@ -33,12 +42,6 @@ def evaluate(subcats=False, comb_method='avg',
                         ('mnb', shared.MNB),
                         ('lda', shared.LDA)], voting='soft',
             comb_method=comb_method, save_avg_path=save_avg_path)
-
-        cv = 5
-        verbose = 100
-        question_loader = ql.QuestionLoader(
-            qfile=shared.QFILE, catfile=shared.CATFILE, subcats=subcats,
-            metadata=True, verbose=True)
 
         # ##################### without gridsearch ############################
         # scores = cross_val_score(
@@ -54,7 +57,16 @@ def evaluate(subcats=False, comb_method='avg',
         C_RANGE = np.logspace(-5, 5, 11)
 
         # grid
-        PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE}
+        PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE,
+                      'svm__union__bow__tokens__stem': [True, False],
+                      'svm__union__bow__vectorize__min_df': shared.MIN_DF,
+                      'svm__union__bow__tfidf': [None, TfidfTransformer()],
+                      'mnb__union__bow__tokens__stem': [True, False],
+                      'mnb__union__bow__vectorize__min_df': shared.MIN_DF,
+                      'mnb__union__bow__tfidf': [None, TfidfTransformer()],
+                      'lda__union__bow__tokens__stem': [True, False],
+                      'lda__union__bow__vectorize__min_df': shared.MIN_DF,
+                      'lda__union__bow__tfidf': [None, TfidfTransformer()]}
 
         # grid = GridSearchCV(
         #     estimator=ensemble, cv=cv, param_grid=PARAM_GRID,
@@ -67,12 +79,27 @@ def evaluate(subcats=False, comb_method='avg',
         clf = GridSearchCVB(estimator=ensemble, param_grid=PARAM_GRID, cv=cv,
                             n_jobs=-1, scoring='f1_macro', verbose=verbose)
 
-    if comb_method is 'bagging':
-        clf = BaggingClassifier(shared.SVM, n_estimators=50, max_sampels=1.0)
+        nested_cv_scores = cross_val_score(
+            clf, X=question_loader.questions, y=question_loader.categoryids,
+            cv=cv, scoring=f1_macroB, verbose=verbose)
 
-    nested_cv_scores = cross_val_score(
-        clf, X=question_loader.questions, y=question_loader.categoryids, cv=cv,
-        scoring=f1_macroB, verbose=verbose)
+    if comb_method == 'bagging':
+        base_estimator = shared.SVM
+        base_estimator.set_params(
+            question_created_at=None,
+            union__bow__selector=None)
+
+        clf = BaggingClassifier(
+            base_estimator, n_estimators=50, max_samples=1.0)
+        clf
+
+        X = [pair['question'] for pair in question_loader.questions]
+        X = np.asarray(X).reshape((-1, 1))
+        nested_cv_scores = cross_val_score(
+            clf, X=X,
+            y=question_loader.categoryids, cv=cv, scoring=f1_macroB,
+            verbose=verbose)
+
     shared.save_and_report(
         results=nested_cv_scores, folder='ensemble',
         name=comb_method + 'gen_error.npy')

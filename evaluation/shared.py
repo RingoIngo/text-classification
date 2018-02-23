@@ -42,6 +42,9 @@ N_PARENTCATS = 14
 GAMMA_RANGE = np.logspace(-3, 3, 7)
 C_RANGE = np.logspace(-3, 3, 7)
 
+# this choice is based on [Seb99]
+MIN_DF = [1, 2, 3]
+
 # define classifiers here
 MNB = SMSGuruModel(classifier=MultinomialNB(), reduction=None,
                    metadata=False, memory=True).model
