@@ -58,13 +58,10 @@ def evaluate(subcats=False, comb_method='avg',
 
         # grid
         PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE,
-                      'svm__union__bow__tokens__stem': [True, False],
                       'svm__union__bow__vectorize__min_df': shared.MIN_DF,
                       'svm__union__bow__tfidf': [None, TfidfTransformer()],
-                      'mnb__union__bow__tokens__stem': [True, False],
                       'mnb__union__bow__vectorize__min_df': shared.MIN_DF,
                       'mnb__union__bow__tfidf': [None, TfidfTransformer()],
-                      'lda__union__bow__tokens__stem': [True, False],
                       'lda__union__bow__vectorize__min_df': shared.MIN_DF,
                       'lda__union__bow__tfidf': [None, TfidfTransformer()]}
 
