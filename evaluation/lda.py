@@ -4,6 +4,7 @@ for the evalutation of LDA as classifier"""
 # Author: Ingo Guehring
 
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+from sklearn.feature_extraction.text import TfidfTransformer
 
 import evaluation.shared as shared
 import model
@@ -12,7 +13,9 @@ import model
 MODEL = model.SMSGuruModel(classifier=LDA(), reduction=None, memory=True)
 
 # PARAM_GRID = {}
-PARAM_GRID = dict(classifier__solver=['svd'])
+# PARAM_GRID = dict(classifier__solver=['svd'])
+PARAM_GRID = {'union__bow__vectorize__min_df': shared.MIN_DF,
+              'union__bow__tfidf': [None, TfidfTransformer()]}
 
 
 def evaluate(gridsearch=True, gen_error=True):

@@ -5,15 +5,23 @@ for the evalutation of multinomial naive bayes as classifier"""
 
 import numpy as np
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.feature_extraction.text import TfidfTransformer
 
 import evaluation.shared as shared
 import model
 
 
-MODEL = model.SMSGuruModel(classifier=MultinomialNB(), reduction=None,
-                           metadata=False, memory=True)
+# MODEL = model.SMSGuruModel(classifier=MultinomialNB(), reduction=None,
+#                            metadata=False, memory=True)
+#
+# PARAM_GRID = dict(classifier__alpha=np.array([1]))
+MODEL = model.SMSGuruModel(
+    CalibratedClassifierCV(MultinomialNB(), method='isotonic'), reduction=None,
+    metadata=False, memory=True).model
 
-PARAM_GRID = dict(classifier__alpha=np.array([1]))
+PARAM_GRID = {'union__bow__vectorize__min_df': shared.MIN_DF,
+              'union__bow__tfidf': [None, TfidfTransformer()]}
 
 
 def evaluate(gridsearch=True, gen_error=True):
