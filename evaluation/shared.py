@@ -46,15 +46,23 @@ C_RANGE = np.logspace(-3, 3, 7)
 MIN_DF = [2, 3]
 
 # define classifiers here
-MNB = SMSGuruModel(classifier=MultinomialNB(), reduction=None,
+MNB = SMSGuruModel(classifier=MultinomialNB(),
                    metadata=False, memory=True).model
+
+MNBcal = SMSGuruModel(
+    CalibratedClassifierCV(MultinomialNB(), method='isotonic'),
+    metadata=False, memory=True).model
+
 SVM = SMSGuruModel(
-    classifier=CalibratedClassifierCV(LinearSVC(C=0.1)), reduction=None).model
-LDA = SMSGuruModel(classifier=LDA(), reduction=None, memory=True).model
+    classifier=CalibratedClassifierCV(LinearSVC(C=0.1))).model
+
+LDA = SMSGuruModel(classifier=LDA(),min_df=3, memory=True).model
+
 LOGREG = SMSGuruModel(
-    classifier=LogisticRegression(C=10), reduction=None).model
+    classifier=LogisticRegression(C=10)).model
+
 RF = SMSGuruModel(classifier=RandomForestClassifier(n_estimators=500),
-                  metadata=False, reduction=None).model
+                  metadata=False).model
 
 
 def merge_two_dicts(x, y):

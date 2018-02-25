@@ -57,14 +57,15 @@ def evaluate(subcats=False, comb_method='avg',
         C_RANGE = np.logspace(-5, 5, 11)
 
         # grid
-        PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE,
-                      'svm__union__bow__vectorize__min_df': shared.MIN_DF,
-                      'svm__union__bow__tfidf': [None, TfidfTransformer()],
-                      'mnb__union__bow__vectorize__min_df': shared.MIN_DF,
-                      'mnb__union__bow__tfidf': [None, TfidfTransformer()],
-                      'lda__union__bow__vectorize__min_df': shared.MIN_DF,
-                      'lda__union__bow__tfidf': [None, TfidfTransformer()]}
+        # PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE,
+        #               'svm__union__bow__vectorize__min_df': shared.MIN_DF,
+        #               'svm__union__bow__tfidf': [None, TfidfTransformer()],
+        #               'mnb__union__bow__vectorize__min_df': shared.MIN_DF,
+        #               'mnb__union__bow__tfidf': [None, TfidfTransformer()],
+        #               'lda__union__bow__vectorize__min_df': shared.MIN_DF,
+        #               'lda__union__bow__tfidf': [None, TfidfTransformer()]}
 
+        PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE}
         # grid = GridSearchCV(
         #     estimator=ensemble, cv=cv, param_grid=PARAM_GRID,
         #     refit=False, error_score=-1, n_jobs=-1, verbose=verbose)
@@ -88,10 +89,9 @@ def evaluate(subcats=False, comb_method='avg',
 
         clf = BaggingClassifier(
             base_estimator, n_estimators=50, max_samples=1.0)
-        clf
 
         X = [pair['question'] for pair in question_loader.questions]
-        X = np.asarray(X).reshape((-1, 1))
+        # X = np.asarray(X).reshape((-1, 1))
         nested_cv_scores = cross_val_score(
             clf, X=X,
             y=question_loader.categoryids, cv=cv, scoring=f1_macroB,

@@ -368,7 +368,8 @@ class SMSGuruModel:
                  metadata=True,
                  memory=False,
                  to_dense=False,
-                 binarize=False):
+                 binarize=False,
+                 min_df=2):
         self.classifier = classifier
         self.pre_reduction = pre_reduction
         self.reduction = reduction
@@ -376,10 +377,12 @@ class SMSGuruModel:
         self.memory = memory
         self.to_dense = to_dense
         self.binarize = binarize
+        self.min_df = min_df
         self.model = self._build(self.classifier,
                                  self.pre_reduction,
                                  self.reduction,
                                  self.metadata,
+                                 self.min_df,
                                  self.memory,
                                  to_dense)
         self.is_fitted = False
@@ -388,8 +391,8 @@ class SMSGuruModel:
         self.grid_search_ = None
         self.param_grid_ = None
 
-    def _build(self, classifier, pre_reduction, reduction, metadata, memory,
-               to_dense):
+    def _build(self, classifier, pre_reduction, reduction, metadata, min_df,
+               memory, to_dense):
         """build the model"""
         steps = [
             # Extract the question & its creation time
@@ -404,10 +407,10 @@ class SMSGuruModel:
                         ('selector', ItemSelector(key='question')),
                         ('tokens', ttc.TextTokenizerAndCleaner()),
                         ('vectorize', CountVectorizer(tokenizer=_identity,
-                                                      min_df=2,
+                                                      min_df=min_df,
                                                       preprocessor=None,
                                                       lowercase=False)),
-                        ('tfidf', None),
+                        ('tfidf', TfidfTransformer()),
                     ])),
 
                     # Pipeline for creation time
