@@ -57,15 +57,21 @@ def evaluate(subcats=False, comb_method='avg',
         C_RANGE = np.logspace(-5, 5, 11)
 
         # grid
-        # PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE,
-        #               'svm__union__bow__vectorize__min_df': shared.MIN_DF,
-        #               'svm__union__bow__tfidf': [None, TfidfTransformer()],
-        #               'mnb__union__bow__vectorize__min_df': shared.MIN_DF,
-        #               'mnb__union__bow__tfidf': [None, TfidfTransformer()],
-        #               'lda__union__bow__vectorize__min_df': shared.MIN_DF,
-        #               'lda__union__bow__tfidf': [None, TfidfTransformer()]}
+        PARAM_GRID_l = {'svm__classifier__base_estimator__C': C_RANGE,
+                        'svm__union__bow__vectorize__min_df': shared.MIN_DF,
+                        'svm__union__bow__tfidf': [None, TfidfTransformer()],
+                        'mnb__union__bow__vectorize__min_df': shared.MIN_DF,
+                        'mnb__union__bow__tfidf': [None, TfidfTransformer()],
+                        'lda__union__bow__vectorize__min_df': shared.MIN_DF,
+                        'lda__union__bow__tfidf': [None, TfidfTransformer()]}
 
-        PARAM_GRID = {'svm__classifier__base_estimator__C': C_RANGE}
+        PARAM_GRID_s = {'svm__classifier__base_estimator__C': C_RANGE}
+
+        PARAM_GRID_m = {'svm__classifier__base_estimator__C': C_RANGE,
+                        'svm__union__bow__vectorize__min_df': shared.MIN_DF,
+                        'mnb__union__bow__vectorize__min_df': shared.MIN_DF,
+                        'lda__union__bow__vectorize__min_df': shared.MIN_DF}
+
         # grid = GridSearchCV(
         #     estimator=ensemble, cv=cv, param_grid=PARAM_GRID,
         #     refit=False, error_score=-1, n_jobs=-1, verbose=verbose)
@@ -73,6 +79,8 @@ def evaluate(subcats=False, comb_method='avg',
         # grid.fit(question_loader.questions, question_loader.categoryids)
         # print(grid.cv_results_)
         # shared.save_and_report(results=grid.cv_results_, folder='ensemble')
+
+        PARAM_GRID = PARAM_GRID_m
 
         clf = GridSearchCVB(estimator=ensemble, param_grid=PARAM_GRID, cv=cv,
                             n_jobs=-1, scoring='f1_macro', verbose=verbose)
