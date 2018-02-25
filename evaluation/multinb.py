@@ -18,7 +18,7 @@ import model
 # PARAM_GRID = dict(classifier__alpha=np.array([1]))
 MODEL = model.SMSGuruModel(
     CalibratedClassifierCV(MultinomialNB(), method='isotonic'), reduction=None,
-    metadata=False, memory=True).model
+    metadata=False, memory=True)
 
 PARAM_GRID = {'union__bow__vectorize__min_df': shared.MIN_DF,
               'union__bow__tfidf': [None, TfidfTransformer()]}
