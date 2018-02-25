@@ -5,6 +5,8 @@ for the evalutation of SVM as classifier with a linear kernel"""
 
 import numpy as np
 from sklearn.svm import LinearSVC
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.calibration import CalibratedClassifierCV
 
 import evaluation.shared as shared
 import model
@@ -17,7 +19,9 @@ CLASSIFIER = LinearSVC()
 # C_RANGE = shared.C_RANGE
 C_RANGE = np.logspace(-5, 5, 11)
 
-PARAM_GRID = [dict(classifier__base_estimator__C=C_RANGE)]
+PARAM_GRID = {'classifier__base_estimator__C': C_RANGE,
+              'union__bow__vectorize__min_df': shared.MIN_DF,
+              'union__bow__tfidf': [None, TfidfTransformer()]}
 
 # model for use in train_apply_classifier
 MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None)
@@ -43,8 +47,9 @@ def evaluate(gridsearch=True, gen_error=True, memory=True):
     ---------
     NOTHING but SAVES the results of the performed computations
     """
-    MODEL = model.SMSGuruModel(classifier=CLASSIFIER, reduction=None,
-                               memory=memory)
+    MODEL = model.SMSGuruModel(
+        CalibratedClassifierCV(LinearSVC()), reduction=None,
+        memory=memory)
     MODEL.set_question_loader(subcats=shared.SUBCATS)
     if gridsearch:
         MODEL.gridsearch(param_grid=PARAM_GRID, n_jobs=shared.N_JOBS,
