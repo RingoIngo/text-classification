@@ -15,8 +15,8 @@ from model.ensemble import GridSearchCVB, VotingClassifierB, f1_macroB
 import evaluation.shared as shared
 
 
-def evaluate(subcats=False, comb_method='avg', gen_error=True,
-             gridsearch=True,
+def evaluate(subcats=False, comb_method='avg', gen_error=False,
+             gridsearch=False,
              save_avg_path='./results/gridsearch/ensemble/raw/'):
     print('subcats: {}, comb_method: {}'
           ', save_avg_path: {}'.format(
