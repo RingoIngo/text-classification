@@ -7,7 +7,7 @@ import os
 import numpy as np
 
 from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, GridSearchCV
 from sklearn.ensemble import BaggingClassifier
 
 import model.question_loader as ql
@@ -15,7 +15,8 @@ from model.ensemble import GridSearchCVB, VotingClassifierB, f1_macroB
 import evaluation.shared as shared
 
 
-def evaluate(subcats=False, comb_method='avg',
+def evaluate(subcats=False, comb_method='avg', gen_error=True,
+             gridsearch=True,
              save_avg_path='./results/gridsearch/ensemble/raw/'):
     print('subcats: {}, comb_method: {}'
           ', save_avg_path: {}'.format(
@@ -72,22 +73,25 @@ def evaluate(subcats=False, comb_method='avg',
                         'mnb__union__bow__vectorize__min_df': shared.MIN_DF,
                         'lda__union__bow__vectorize__min_df': shared.MIN_DF}
 
-        # grid = GridSearchCV(
-        #     estimator=ensemble, cv=cv, param_grid=PARAM_GRID,
-        #     refit=False, error_score=-1, n_jobs=-1, verbose=verbose)
-        #
-        # grid.fit(question_loader.questions, question_loader.categoryids)
-        # print(grid.cv_results_)
-        # shared.save_and_report(results=grid.cv_results_, folder='ensemble')
-
         PARAM_GRID = PARAM_GRID_m
+        if gridsearch:
+            grid = GridSearchCV(
+                estimator=ensemble, cv=cv, param_grid=PARAM_GRID,
+                refit=False, error_score=-1, n_jobs=-1, verbose=verbose,
+                scoring='f1_macro')
 
-        clf = GridSearchCVB(estimator=ensemble, param_grid=PARAM_GRID, cv=cv,
-                            n_jobs=-1, scoring='f1_macro', verbose=verbose)
+            grid.fit(question_loader.questions, question_loader.categoryids)
+            shared.save_and_report(results=grid.cv_results_, folder='ensemble')
 
-        nested_cv_scores = cross_val_score(
-            clf, X=question_loader.questions, y=question_loader.categoryids,
-            cv=cv, scoring=f1_macroB, verbose=verbose)
+        if gen_error:
+            clf = GridSearchCVB(
+                estimator=ensemble, param_grid=PARAM_GRID, cv=cv,
+                n_jobs=-1, scoring='f1_macro', verbose=verbose)
+
+            nested_cv_scores = cross_val_score(
+                clf, X=question_loader.questions,
+                y=question_loader.categoryids,
+                cv=cv, scoring=f1_macroB, verbose=verbose)
 
     if comb_method == 'bagging':
         base_estimator = shared.SVM
@@ -105,9 +109,10 @@ def evaluate(subcats=False, comb_method='avg',
             y=question_loader.categoryids, cv=cv, scoring=f1_macroB,
             verbose=verbose)
 
-    shared.save_and_report(
-        results=nested_cv_scores, folder='ensemble',
-        name=comb_method + 'gen_error.npy')
+    if gen_error:
+        shared.save_and_report(
+            results=nested_cv_scores, folder='ensemble',
+            name=comb_method + 'gen_error.npy')
 
 
 if __name__ == "__main__":
@@ -121,6 +126,14 @@ if __name__ == "__main__":
                         default=argparse.SUPPRESS)
 
     parser.add_argument('--save_avg_path', dest='save_avg_path',
+                        default=argparse.SUPPRESS)
+
+    parser.add_argument('-gs', '--gridsearch', dest='gridsearch',
+                        action='store_true',
+                        default=argparse.SUPPRESS)
+
+    parser.add_argument('-ge', '--gen_error', dest='gen_error',
+                        action='store_true',
                         default=argparse.SUPPRESS)
 
     evaluate(**vars(parser.parse_args()))
