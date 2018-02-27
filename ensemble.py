@@ -81,7 +81,12 @@ def evaluate(subcats=False, comb_method='avg', gen_error=False,
                 scoring='f1_macro')
 
             grid.fit(question_loader.questions, question_loader.categoryids)
-            shared.save_and_report(results=grid.cv_results_, folder='ensemble')
+            if subcats:
+                name = comb_method + 'subcats' + 'grid.npy'
+            else:
+                name = comb_method + 'grid.npy'
+            shared.save_and_report(results=grid.cv_results_, folder='ensemble',
+                                   name=name)
 
         if gen_error:
             clf = GridSearchCVB(
@@ -110,9 +115,13 @@ def evaluate(subcats=False, comb_method='avg', gen_error=False,
             verbose=verbose)
 
     if gen_error:
+        if subcats:
+            name = comb_method + 'subcats' + 'gen.npy'
+        else:
+            name = comb_method + 'gen.npy'
         shared.save_and_report(
             results=nested_cv_scores, folder='ensemble',
-            name=comb_method + 'gen_error.npy')
+            name=name)
 
 
 if __name__ == "__main__":
