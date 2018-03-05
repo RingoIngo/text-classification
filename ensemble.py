@@ -42,7 +42,7 @@ def evaluate(subcats=False, comb_method='avg', gen_error=False,
         MNB = shared.MNB_subcats if subcats else shared.MNB_parentcats
         ensemble = VotingClassifierB(
             estimators=[('svm', SVM),
-                        ('mnb', shared.MNB),
+                        ('mnb', MNB),
                         ('lda', shared.LDA)], voting='soft',
             comb_method=comb_method, save_avg_path=save_avg_path)
 
