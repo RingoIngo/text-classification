@@ -39,6 +39,7 @@ def evaluate(subcats=False, comb_method='avg', gen_error=False,
         # Put the estimator with the best expected perfromance at the first
         # position! Then its probability output will be saved!
         SVM = shared.SVM_subcats if subcats else shared.SVM_parentcats
+        MNB = shared.MNB_subcats if subcats else shared.MNB_parentcats
         ensemble = VotingClassifierB(
             estimators=[('svm', SVM),
                         ('mnb', shared.MNB),

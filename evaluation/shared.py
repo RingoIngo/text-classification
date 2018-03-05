@@ -52,8 +52,12 @@ MIN_DF = [2, 3]
 # define classifiers here
 
 # use isotonic calibration
-MNB = SMSGuruModel(
+MNB_subcats = SMSGuruModel(
     CalibratedClassifierCV(MultinomialNB(), method='isotonic', cv=CCV),
+    metadata=False, memory=True).model
+
+MNB_parentcats = SMSGuruModel(
+    CalibratedClassifierCV(MultinomialNB(), method='isotonic'),
     metadata=False, memory=True).model
 
 # use sigmoid calibration
