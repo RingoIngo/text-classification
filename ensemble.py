@@ -38,8 +38,9 @@ def evaluate(subcats=False, comb_method='avg', gen_error=False,
         # If a classifier is changed the grid might have to be changed, too
         # Put the estimator with the best expected perfromance at the first
         # position! Then its probability output will be saved!
+        SVM = shared.SVM_subcats if subcats else shared.SVM_parentcats
         ensemble = VotingClassifierB(
-            estimators=[('svm', shared.SVM),
+            estimators=[('svm', SVM),
                         ('mnb', shared.MNB),
                         ('lda', shared.LDA)], voting='soft',
             comb_method=comb_method, save_avg_path=save_avg_path)

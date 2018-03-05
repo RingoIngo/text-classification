@@ -194,7 +194,7 @@ class QuestionLoader(object):
                                  key=operator.itemgetter(1), reverse=True))
         return category_counts
 
-    def read_test_data(self, qfile_test, verbose):
+    def read_test_data(self, qfile_test, verbose=False):
         """reads and stores the questions
 
         Returns

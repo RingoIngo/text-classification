@@ -12,12 +12,16 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import KFold
 
 from model import SMSGuruModel
 
 
 # number of folds used in cross-validation
 CV = 5
+# number of folds used in cross-validation in probability calibration
+# CCV = 2
+CCV = KFold(n_splits=3)
 
 QFILE = './data/question_train.csv'
 CATFILE = './data/category.csv'
@@ -49,12 +53,17 @@ MIN_DF = [2, 3]
 
 # use isotonic calibration
 MNB = SMSGuruModel(
-    CalibratedClassifierCV(MultinomialNB(), method='isotonic'),
+    CalibratedClassifierCV(MultinomialNB(), method='isotonic', cv=CCV),
     metadata=False, memory=True).model
 
 # use sigmoid calibration
-SVM = SMSGuruModel(
-    classifier=CalibratedClassifierCV(LinearSVC(C=0.1))).model
+SVM_subcats = SMSGuruModel(
+    classifier=CalibratedClassifierCV(LinearSVC(C=0.1), cv=CCV),
+    metadata=False).model
+
+SVM_parentcats = SMSGuruModel(
+    classifier=CalibratedClassifierCV(LinearSVC(C=0.1)),
+    metadata=False).model
 
 # no info about calibration
 LDA = SMSGuruModel(classifier=LDA(), min_df=3, memory=True).model
@@ -65,7 +74,7 @@ LOGREG = SMSGuruModel(
 
 # use sigmoid caibration
 RF = SMSGuruModel(
-    CalibratedClassifierCV(RandomForestClassifier(n_estimators=500)),
+    CalibratedClassifierCV(RandomForestClassifier(n_estimators=500), cv=CCV),
     metadata=False).model
 
 
