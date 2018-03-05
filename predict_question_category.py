@@ -12,8 +12,8 @@ from sklearn.model_selection import GridSearchCV
 import model.question_loader as ql
 import evaluation.shared as shared
 
-#TODO: correct input name and dont save
-def predict_question_category(qfile='./data/question_test.csv'):
+
+def predict_question_category(qfile='questions.csv'):
     """Load and apply fitted classifiers for parent and subcats problem
 
     The classifier that is used is a linear Support Vector Machine. More
@@ -45,16 +45,14 @@ def predict_question_category(qfile='./data/question_test.csv'):
     qtest = question_loader.test_questions
 
     # minor
-    #subcats = pickle.load(open('subcats.sav', 'rb'))
     probas_subcats = model_subcats.predict_proba(qtest)
     subcats = model_subcats.classes_
     minor_categories = subcats[np.argmax(probas_subcats, axis=1)]
     confidence_minor_cats = np.max(probas_subcats, axis=1)
 
     # major
-    # parentcats = pickle.load(open('parentcats.sav', 'rb'))
     probas_parentcats = model_parentcats.predict_proba(qtest)
-    parentcats = model_paretncats.classes_
+    parentcats = model_parentcats.classes_
     major_categories = parentcats[np.argmax(probas_parentcats, axis=1)]
     confidence_major_cats = np.max(probas_parentcats, axis=1)
 
@@ -67,7 +65,6 @@ def predict_question_category(qfile='./data/question_test.csv'):
              'confidence_major_cat': confidence_major_cats[sample],
              'confidence_minor_cat': confidence_minor_cats[sample]})
 
-    pickle.dump(prediction, open('prediction.sav', 'wb'))
     return prediction
 
 
@@ -92,7 +89,6 @@ def fit_and_save_final_predictor():
 
     grid_subcats.fit(question_loader.questions, question_loader.categoryids)
     pickle.dump(grid_subcats.best_estimator_, open('model_subcats.sav', 'wb'))
-    pickle.dump(question_loader.categories, open('subcats.sav', 'wb'))
 
     # parent cats
     question_loader = ql.QuestionLoader(
@@ -107,10 +103,9 @@ def fit_and_save_final_predictor():
     grid_parentcats.fit(question_loader.questions, question_loader.categoryids)
     pickle.dump(grid_parentcats.best_estimator_,
                 open('model_parentcats.sav', 'wb'))
-    pickle.dump(question_loader.categories, open('parentcats.sav', 'wb'))
 
 
-def fit_or_predict(fit=True):
+def fit_or_predict(fit=False):
     if fit:
         fit_and_save_final_predictor()
     else:
@@ -118,9 +113,9 @@ def fit_or_predict(fit=True):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='git or predict')
-    parser.add_argument('--predict', dest='fit',
-                        action='store_false',
+    parser = argparse.ArgumentParser(description='fit or predict')
+    parser.add_argument('--fit', dest='fit',
+                        action='store_true',
                         default=argparse.SUPPRESS)
 
     fit_or_predict(**vars(parser.parse_args()))

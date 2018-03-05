@@ -18,6 +18,32 @@ import evaluation.shared as shared
 def evaluate(subcats=False, comb_method='avg', gen_error=False,
              gridsearch=False,
              save_avg_path='./results/gridsearch/ensemble/raw/'):
+    """
+    Run an ensemble method.
+
+    A voting classifier is used with three inner classifiers (SVM, mNB, LDA).
+    The ensemble method is then either evaluated in a gridsearch to evaluate
+    the associated parameter grid or in a nested gridsearch to get an estimate
+    for the generalization error. There is also the beginning a a bagging
+    classifier implemented. But that is not working so far.
+
+    Parameters
+    ----------
+    subcats : if True subcategories are used as lables, else parent categories
+
+    comb_method: string, determines the method used to combine the classifiers
+        in the voting classifier. Can be either 'mult' or 'avg', then the
+        classifiers are combined by multiplyinb or averaging, respectively.
+
+    gen_error : boolean, if true a nested gridsearch is performed to estimate
+        generalization error.
+
+    gridsearch : boolean, if true a gridsearch is performed to find the best
+        parameter combination from the associated grid.
+
+    save_avg_path : string, determines where the probs from the voting
+        classifier are saved from the nested gridsearch.
+    """
     print('subcats: {}, comb_method: {}'
           ', save_avg_path: {}'.format(
                   subcats, comb_method, save_avg_path))
@@ -34,7 +60,6 @@ def evaluate(subcats=False, comb_method='avg', gen_error=False,
     verbose = 100
 
     if comb_method != 'bagging':
-        print(comb_method)
         # If a classifier is changed the grid might have to be changed, too
         # Put the estimator with the best expected perfromance at the first
         # position! Then its probability output will be saved!
