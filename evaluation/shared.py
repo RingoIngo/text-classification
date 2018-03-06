@@ -27,7 +27,7 @@ QFILE = './data/question_train.csv'
 CATFILE = './data/category.csv'
 
 # in milestone it suffices to focus on parent categories
-SUBCATS = False
+SUBCATS = True
 
 # number of jobs used in CV -> parallelize
 N_JOBS = -1
