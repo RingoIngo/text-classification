@@ -7,6 +7,7 @@ import numpy as np
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.model_selection import KFold
 
 import evaluation.shared as shared
 import model
@@ -47,8 +48,9 @@ def evaluate(gridsearch=True, gen_error=True, memory=True):
     ---------
     NOTHING but SAVES the results of the performed computations
     """
+    CCV = KFold(n_splits=3) if shared.SUBCATS else 3
     MODEL = model.SMSGuruModel(
-        CalibratedClassifierCV(LinearSVC()), reduction=None,
+        CalibratedClassifierCV(LinearSVC(), cv=CCV), reduction=None,
         memory=memory)
     MODEL.set_question_loader(subcats=shared.SUBCATS)
     if gridsearch:
