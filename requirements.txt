@@ -56,7 +56,7 @@ tornado==4.5.2
 traitlets==4.3.2
 typing==3.6.2
 ufw===0.34-rc-0ubuntu2
-urllib3==1.7.1
+urllib3==1.26.5
 wcwidth==0.1.7
 webencodings==0.5.1
 widgetsnbextension==3.0.6
